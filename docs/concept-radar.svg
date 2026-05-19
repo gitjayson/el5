@@ -1,0 +1,100 @@
+<svg width="100%" viewBox="0 0 680 720" role="img" xmlns="http://www.w3.org/2000/svg" style="display:block; background:#07070d; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;">
+<title>el5 crypto radar — concept mockup</title>
+<desc>Cyberpunk-styled radial correlation visualization for crypto tokens, with TV-static texture, neon palette, and crypto-native dimensions: trading session arc, stablecoin proximity orbs, fear-greed ring, and an active scanning sweep.</desc>
+<defs>
+<pattern id="static" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+<rect width="3" height="3" fill="#07070d"/>
+<rect x="0" y="0" width="1" height="1" fill="#1a1a28" opacity="0.55"/>
+<rect x="2" y="1" width="1" height="1" fill="#0f0f1c" opacity="0.7"/>
+<rect x="1" y="2" width="1" height="1" fill="#15152a" opacity="0.45"/>
+</pattern>
+<pattern id="scanlines" x="0" y="0" width="2" height="3" patternUnits="userSpaceOnUse">
+<rect width="2" height="3" fill="transparent"/>
+<rect y="0" width="2" height="1" fill="#000" opacity="0.18"/>
+</pattern>
+<radialGradient id="focusGlow" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0%" stop-color="#ff10f0" stop-opacity="0.55"/>
+<stop offset="60%" stop-color="#ff10f0" stop-opacity="0.08"/>
+<stop offset="100%" stop-color="#ff10f0" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="upGlow" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0%" stop-color="#39ff14" stop-opacity="0.35"/>
+<stop offset="100%" stop-color="#39ff14" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="downGlow" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0%" stop-color="#ff5500" stop-opacity="0.35"/>
+<stop offset="100%" stop-color="#ff5500" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0%" stop-color="#00f0ff" stop-opacity="0"/>
+<stop offset="100%" stop-color="#00f0ff" stop-opacity="0.85"/>
+</linearGradient>
+</defs>
+<rect x="0" y="0" width="680" height="720" fill="url(#static)"/>
+<rect x="0" y="0" width="680" height="38" fill="#0a0a14" stroke="#1a1a2e" stroke-width="0.5"/>
+<text x="20" y="24" fill="#ff10f0" font-size="13" font-weight="700" letter-spacing="0.2em">EL5.IO</text>
+<text x="80" y="24" fill="#5a5a78" font-size="11" letter-spacing="0.18em">▌ NO SIGNAL · ALL STRUCTURE</text>
+<text x="450" y="24" fill="#7a8aff" font-size="11" letter-spacing="0.16em">TUE 19:42:08 UTC</text>
+<rect x="588" y="14" width="74" height="14" fill="none" stroke="#39ff14" stroke-width="0.6"/>
+<circle cx="596" cy="21" r="2.2" fill="#39ff14"/>
+<text x="604" y="25" fill="#39ff14" font-size="10" letter-spacing="0.14em">LIVE · 24/7</text>
+<text x="20" y="60" fill="#7a8aff" font-size="10" letter-spacing="0.2em">SESSION</text>
+<g transform="translate(20,68)">
+<rect x="0" y="0" width="60" height="14" fill="none" stroke="#1f1f38" stroke-width="0.5"/>
+<text x="30" y="10" text-anchor="middle" fill="#3a3a55" font-size="9" letter-spacing="0.14em">ASIA</text>
+<rect x="64" y="0" width="60" height="14" fill="none" stroke="#1f1f38" stroke-width="0.5"/>
+<text x="94" y="10" text-anchor="middle" fill="#3a3a55" font-size="9" letter-spacing="0.14em">EU</text>
+<rect x="128" y="0" width="60" height="14" fill="#ff10f0" fill-opacity="0.18" stroke="#ff10f0" stroke-width="0.8"/>
+<text x="158" y="10" text-anchor="middle" fill="#ff10f0" font-size="9" font-weight="700" letter-spacing="0.14em">US</text>
+</g>
+<text x="500" y="60" fill="#7a8aff" font-size="10" letter-spacing="0.2em">FEAR · GREED</text>
+<rect x="500" y="68" width="160" height="14" fill="none" stroke="#1f1f38" stroke-width="0.5"/>
+<rect x="500" y="68" width="107" height="14" fill="#39ff14" fill-opacity="0.18"/>
+<line x1="607" y1="62" x2="607" y2="88" stroke="#39ff14" stroke-width="1.2"/>
+<text x="615" y="78" fill="#39ff14" font-size="10" font-weight="700">67</text>
+<circle cx="340" cy="340" r="220" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+<circle cx="340" cy="340" r="170" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+<circle cx="340" cy="340" r="120" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+<circle cx="340" cy="340" r="70" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+<circle cx="340" cy="340" r="60" fill="url(#focusGlow)"/>
+<polygon points="340,295 379,318 379,362 340,385 301,362 301,318" fill="#0a0a14" stroke="#ff10f0" stroke-width="1.5"/>
+<text x="340" y="334" text-anchor="middle" fill="#ff10f0" font-size="18" font-weight="700" letter-spacing="0.06em">$BTC</text>
+<text x="340" y="352" text-anchor="middle" fill="#e8e8ff" font-size="11">$97,420</text>
+<text x="340" y="368" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">8/12 ▲</text>
+<line x1="340" y1="340" x2="340" y2="180" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="450" y2="200" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="500" y2="260" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="520" y2="340" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="490" y2="430" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="430" y2="490" stroke="#ff5500" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="340" y2="510" stroke="#ff5500" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="250" y2="490" stroke="#ff5500" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="200" y2="430" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="160" y2="340" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="180" y2="260" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<line x1="340" y1="340" x2="230" y2="200" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
+<g><circle cx="340" cy="180" r="32" fill="url(#upGlow)"/><polygon points="340,160 358,170 358,190 340,200 322,190 322,170" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="340" y="184" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$ETH</text><text x="340" y="148" text-anchor="middle" fill="#7a8aff" font-size="9">0.91</text></g>
+<g><circle cx="450" cy="200" r="30" fill="url(#upGlow)"/><polygon points="450,182 466,191 466,209 450,218 434,209 434,191" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="450" y="204" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$SOL</text><text x="478" y="184" fill="#7a8aff" font-size="9">0.84</text><circle cx="466" cy="184" r="2.8" fill="none" stroke="#c19eff" stroke-width="0.8" opacity="0.7"/></g>
+<g><circle cx="500" cy="260" r="28" fill="url(#upGlow)"/><polygon points="500,244 514,252 514,268 500,276 486,268 486,252" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="500" y="264" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$BNB</text><text x="528" y="248" fill="#7a8aff" font-size="9">0.77</text></g>
+<g><circle cx="520" cy="340" r="28" fill="url(#upGlow)"/><polygon points="520,324 534,332 534,348 520,356 506,348 506,332" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="520" y="344" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$AVAX</text><text x="552" y="344" fill="#7a8aff" font-size="9">0.72</text></g>
+<g><circle cx="490" cy="430" r="26" fill="url(#upGlow)"/><polygon points="490,416 502,423 502,437 490,444 478,437 478,423" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="490" y="434" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700">$LINK</text><text x="518" y="446" fill="#7a8aff" font-size="9">0.66</text></g>
+<g><circle cx="430" cy="490" r="26" fill="url(#downGlow)"/><polygon points="430,476 442,483 442,497 430,504 418,497 418,483" fill="#0a0a14" stroke="#ff5500" stroke-width="1.4"/><text x="430" y="494" text-anchor="middle" fill="#ff5500" font-size="9" font-weight="700">$DOGE</text><text x="458" y="510" fill="#7a8aff" font-size="9">0.58</text></g>
+<g><circle cx="340" cy="510" r="26" fill="url(#downGlow)"/><polygon points="340,496 352,503 352,517 340,524 328,517 328,503" fill="#0a0a14" stroke="#ff5500" stroke-width="1.4"/><text x="340" y="514" text-anchor="middle" fill="#ff5500" font-size="9" font-weight="700">$XRP</text><text x="340" y="546" text-anchor="middle" fill="#7a8aff" font-size="9">0.49</text></g>
+<g><circle cx="250" cy="490" r="26" fill="url(#downGlow)"/><polygon points="250,476 262,483 262,497 250,504 238,497 238,483" fill="#0a0a14" stroke="#ff5500" stroke-width="1.4" stroke-dasharray="3 2"/><text x="250" y="494" text-anchor="middle" fill="#ff5500" font-size="9" font-weight="700">$ADA</text><text x="218" y="510" fill="#c19eff" font-size="9">−0.41</text></g>
+<g><circle cx="200" cy="430" r="26" fill="url(#upGlow)"/><polygon points="200,416 212,423 212,437 200,444 188,437 188,423" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="200" y="434" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700">$LTC</text><text x="162" y="446" fill="#7a8aff" font-size="9">0.63</text></g>
+<g><circle cx="160" cy="340" r="28" fill="url(#upGlow)"/><polygon points="160,324 174,332 174,348 160,356 146,348 146,332" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="160" y="344" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$DOT</text><text x="118" y="344" fill="#7a8aff" font-size="9">0.74</text></g>
+<g><circle cx="180" cy="260" r="28" fill="url(#upGlow)"/><polygon points="180,244 194,252 194,268 180,276 166,268 166,252" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="180" y="264" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$ATOM</text><text x="142" y="248" fill="#7a8aff" font-size="9">0.79</text></g>
+<g><circle cx="230" cy="200" r="30" fill="url(#upGlow)"/><polygon points="230,182 246,191 246,209 230,218 214,209 214,191" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="230" y="204" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700">$NEAR</text><text x="200" y="184" fill="#7a8aff" font-size="9">0.86</text></g>
+<rect x="20" y="588" width="640" height="100" fill="none" stroke="#1a1a2e" stroke-width="0.5"/>
+<text x="32" y="606" fill="#7a8aff" font-size="10" letter-spacing="0.2em">CHANNEL · 15M</text>
+<text x="32" y="620" fill="#ff10f0" font-size="11" font-weight="700">$97,201 ── $97,580 ▲</text>
+<rect x="40" y="624" width="600" height="20" fill="#39ff14" fill-opacity="0.06" stroke="#39ff14" stroke-width="0.6"/>
+<rect x="40" y="644" width="600" height="22" fill="#ff10f0" fill-opacity="0.04" stroke="#ff10f0" stroke-width="0.6"/>
+<rect x="40" y="666" width="600" height="20" fill="#ff5500" fill-opacity="0.06" stroke="#ff5500" stroke-width="0.6"/>
+<polyline points="40,658 100,656 160,655 220,654 280,656 340,655 400,653 460,652 520,654 580,655 640,656" fill="none" stroke="#ff10f0" stroke-width="1.4"/>
+<circle cx="640" cy="656" r="3.5" fill="#ff10f0"/>
+<text x="40" y="700" fill="#3a3a55" font-size="9" letter-spacing="0.16em">T−15M</text>
+<text x="640" y="700" text-anchor="end" fill="#3a3a55" font-size="9" letter-spacing="0.16em">T=NOW</text>
+<text x="340" y="700" text-anchor="middle" fill="#7a8aff" font-size="9" letter-spacing="0.16em">STABLECOIN PROXIMITY · 2/12 · ◇</text>
+<rect x="0" y="0" width="680" height="720" fill="url(#scanlines)" pointer-events="none" opacity="0.55"/>
+</svg>
