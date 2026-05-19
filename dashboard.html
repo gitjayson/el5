@@ -20,6 +20,7 @@
   --green: #39ff14;
   --orange: #ff5500;
   --cyan: #00f0ff;
+  --gold: #ffa500;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -113,12 +114,13 @@ header > * { pointer-events: auto; }
 main {
   position: relative;
   z-index: 5;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  min-height: 100vh;
   padding: 56px 16px 60px;
+  gap: 0;
 }
 #radar-wrap {
   width: min(820px, 96vw);
@@ -172,11 +174,403 @@ footer a:hover { color: var(--muted); }
   color: var(--dim);
   letter-spacing: 0.18em;
 }
+
+/* ── Alert System ── */
+#alert-container {
+  position: fixed;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  width: min(520px, 92vw);
+}
+.alert-banner {
+  pointer-events: auto;
+  background: rgba(10, 10, 20, 0.92);
+  border: 1px solid var(--magenta);
+  border-left: 3px solid var(--magenta);
+  padding: 10px 14px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: alertSlide 0.35s ease-out;
+  box-shadow: 0 0 24px rgba(255,16,240,0.18), inset 0 0 30px rgba(255,16,240,0.04);
+}
+.alert-banner.fade-out {
+  animation: alertFade 0.4s ease-in forwards;
+}
+.alert-icon {
+  color: var(--magenta);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.alert-body { flex: 1; }
+.alert-sym {
+  font-weight: 700;
+  color: var(--cyan);
+}
+.alert-val {
+  color: var(--magenta);
+  font-weight: 700;
+}
+.alert-time {
+  color: var(--dim);
+  font-size: 9px;
+  flex-shrink: 0;
+}
+.alert-dismiss {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 2px;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.alert-dismiss:hover { color: var(--text); }
+
+@keyframes alertSlide {
+  from { opacity: 0; transform: translateY(-18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes alertFade {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Alert history toggle */
+#alert-history-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 4px 10px;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+}
+#alert-history-btn:hover { color: var(--text); border-color: var(--muted); }
+#alert-badge {
+  position: absolute;
+  top: -5px; right: -5px;
+  background: var(--magenta);
+  color: #fff;
+  font-size: 8px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+#alert-badge.hidden { display: none; }
+
+/* History panel */
+#alert-history-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(380px, 88vw);
+  background: rgba(7, 7, 13, 0.96);
+  border-left: 1px solid var(--border);
+  z-index: 200;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+}
+#alert-history-panel.open { transform: translateX(0); }
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.18em;
+  font-size: 10px;
+  color: var(--muted);
+}
+.history-close {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 16px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.history-close:hover { color: var(--text); }
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.history-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(122,138,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.history-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.history-item-sym { font-weight: 700; color: var(--cyan); }
+.history-item-time { color: var(--dim); font-size: 9px; }
+.history-item-detail { color: var(--muted); font-size: 10px; }
+.history-empty {
+  color: var(--dim);
+  text-align: center;
+  padding: 40px 16px;
+  letter-spacing: 0.14em;
+}
+.history-clear {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.history-clear:hover { color: var(--text); border-color: var(--muted); }
+
+/* View toggle */
+#view-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 4px 10px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 0.2s, color 0.2s;
+}
+#view-toggle:hover { color: var(--text); border-color: var(--muted); }
+#view-toggle.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* Diversify mode ring labels */
+.div-ring-label {
+  font-family: 'JetBrains Mono', monospace;
+  fill: var(--dim);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+/* Weight badge on diversify peers */
+.weight-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ── Replay Controls ── */
+#replay-bar {
+  display: none;
+  width: min(820px, 96vw);
+  margin: 0 auto;
+  padding: 12px 0 0;
+  z-index: 10;
+  position: relative;
+}
+#replay-bar.active { display: block; }
+
+.replay-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.replay-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.replay-btn:hover { border-color: var(--muted); color: var(--text); }
+.replay-btn.active { border-color: var(--cyan); color: var(--cyan); }
+
+#replay-scrub {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--dim);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+#replay-scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--magenta);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 8px rgba(255,16,240,0.4);
+  cursor: pointer;
+}
+#replay-scrub::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--magenta);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 8px rgba(255,16,240,0.4);
+  cursor: pointer;
+}
+
+#replay-ts {
+  font-size: 10px;
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+  min-width: 140px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.replay-speed {
+  display: flex;
+  gap: 4px;
+  margin-left: 4px;
+}
+.speed-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-family: inherit;
+  font-size: 9px;
+  padding: 2px 6px;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+}
+.speed-btn:hover { color: var(--muted); border-color: var(--muted); }
+.speed-btn.active { color: var(--cyan); border-color: var(--cyan); }
+
+.replay-exit {
+  background: none;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  font-family: inherit;
+  font-size: 9px;
+  padding: 3px 8px;
+  cursor: pointer;
+  letter-spacing: 0.14em;
+  margin-left: auto;
+}
+.replay-exit:hover { color: var(--text); border-color: var(--text); }
+
+#replay-enter-btn, #snapshot-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 4px 10px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+#replay-enter-btn:hover, #snapshot-btn:hover { color: var(--text); border-color: var(--muted); }
+#snapshot-btn.flash { border-color: var(--cyan); color: var(--cyan); transition: none; }
+#snapshot-btn.done { border-color: var(--green); color: var(--green); }
+
+/* Replay mode indicator */
+.replay-mode-badge {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--magenta);
+  opacity: 0.6;
+  z-index: 15;
+  pointer-events: none;
+  display: none;
+}
+.replay-mode-badge.active { display: block; }
+
+/* ── Channel strip ── */
+#channel-section {
+  width: min(820px, 96vw);
+  padding: 8px 0 0;
+}
+.channel-header {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+#channel-container {
+  background: #0a0a14;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-height: 120px;
+}
+#channel-container svg { display: block; width: 100%; }
+.ch-band { rx: 3; ry: 3; }
+.ch-label {
+  fill: var(--muted);
+  font-size: 9px;
+  font-family: "JetBrains Mono", monospace;
+  letter-spacing: 0.12em;
+}
+.ch-price {
+  fill: var(--text);
+  font-size: 9px;
+  font-family: "JetBrains Mono", monospace;
+}
+.ch-polyline {
+  fill: none;
+  stroke: #e8e8ff;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.ch-dot {
+  fill: #e8e8ff;
+  stroke: #07060e;
+  stroke-width: 2;
+}
+.ch-time {
+  fill: #3a3a55;
+  font-size: 8px;
+  font-family: "JetBrains Mono", monospace;
+}
+
 @media (max-width: 600px) {
   header { padding: 10px 14px; }
   footer { padding: 10px 14px; font-size: 9px; }
   .status { gap: 10px; }
   .wordmark { font-size: 11px; }
+  #replay-ts { min-width: 100px; font-size: 9px; }
+  .replay-speed { display: none; }
 }
 </style>
 </head>
@@ -189,9 +583,26 @@ footer a:hover { color: var(--muted); }
   <div class="wordmark">EL5.IO<span class="sep">▌</span><span class="panel-name">DASHBOARD</span></div>
   <div class="status">
     <span id="clock" class="status-clock">--:--:-- UTC</span>
+    <button id="replay-enter-btn" title="Historical replay">▌ REPLAY</button>
+    <button id="view-toggle" title="Toggle diversification view">▌ DIVERSIFY</button>
+    <button id="snapshot-btn" title="Export radar as PNG">▌ SNAP</button>
+    <button id="alert-history-btn" title="Alert history">▌ ALERTS<span id="alert-badge" class="hidden">0</span></button>
     <span class="status-refresh"><span id="dot" class="status-dot"></span><span id="dot-text">IDLE</span></span>
   </div>
 </header>
+
+<div id="alert-container"></div>
+
+<div id="alert-history-panel">
+  <div class="history-header">
+    <span>▌ ALERT HISTORY</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="history-clear" id="history-clear-btn">CLEAR</button>
+      <button class="history-close" id="history-close-btn">✕</button>
+    </div>
+  </div>
+  <div class="history-list" id="history-list"></div>
+</div>
 
 <main>
   <div id="radar-wrap">
@@ -210,6 +621,14 @@ footer a:hover { color: var(--muted); }
           <stop offset="0%" stop-color="#ff5500" stop-opacity="0.32"/>
           <stop offset="100%" stop-color="#ff5500" stop-opacity="0"/>
         </radialGradient>
+        <radialGradient id="fgu" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stop-color="#e8e8ff" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#e8e8ff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="fgd" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stop-color="#ff10f0" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#ff10f0" stop-opacity="0"/>
+        </radialGradient>
       </defs>
       <g id="rings">
         <circle cx="400" cy="400" r="320" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
@@ -222,15 +641,37 @@ footer a:hover { color: var(--muted); }
       <g id="lines"></g>
       <g id="peers"></g>
       <g id="focus">
-        <circle cx="400" cy="400" r="62" fill="url(#fg)"/>
-        <polygon points="400,344 449,372 449,428 400,456 351,428 351,372" fill="#0a0a14" stroke="#ff10f0" stroke-width="1.6"/>
-        <text x="400" y="392" text-anchor="middle" fill="#ff10f0" font-size="20" font-weight="700" font-family="JetBrains Mono, monospace">$BTC</text>
-        <text x="400" y="411" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="JetBrains Mono, monospace" id="focus-price">—</text>
-        <text x="400" y="428" text-anchor="middle" font-size="10" font-weight="700" font-family="JetBrains Mono, monospace" id="focus-verdict" fill="#7a8aff">— / 12</text>
+        <circle id="focus-glow" cx="400" cy="400" r="62" fill="url(#fg)"/>
+        <polygon id="focus-hex" points="400,344 449,372 449,428 400,456 351,428 351,372" fill="#0a0a14" stroke="#ff10f0" stroke-width="1.6"/>
+        <text id="focus-ticker" x="400" y="388" text-anchor="middle" fill="#ff10f0" font-size="20" font-weight="700" font-family="JetBrains Mono, monospace">$BTC</text>
+        <text x="400" y="406" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="JetBrains Mono, monospace" id="focus-price">—</text>
+        <text x="400" y="421" text-anchor="middle" font-size="13" font-weight="700" font-family="JetBrains Mono, monospace" id="focus-verdict" fill="#7a8aff">—</text>
+        <text x="400" y="444" text-anchor="middle" font-size="9" font-weight="500" font-family="JetBrains Mono, monospace" letter-spacing="0.16em" id="regime-label" fill="#3a3a55">—</text>
       </g>
     </svg>
   </div>
+  <div id="channel-section">
+    <div class="channel-header">▌ BTC CHANNEL</div>
+    <div id="channel-container"></div>
+  </div>
 </main>
+
+<div class="replay-mode-badge" id="replay-badge">▌ REPLAY MODE</div>
+
+<div id="replay-bar">
+  <div class="replay-row">
+    <button class="replay-btn" id="replay-play" title="Play / Pause">▶</button>
+    <input type="range" id="replay-scrub" min="0" max="1" step="1" value="0">
+    <div class="replay-speed">
+      <button class="speed-btn active" data-speed="1">1×</button>
+      <button class="speed-btn" data-speed="2">2×</button>
+      <button class="speed-btn" data-speed="4">4×</button>
+      <button class="speed-btn" data-speed="8">8×</button>
+    </div>
+    <span id="replay-ts">—</span>
+    <button class="replay-exit" id="replay-exit">EXIT</button>
+  </div>
+</div>
 
 <footer>
   <span class="tip">SOURCE · COINBASE EXCHANGE · 7D ROLLING PEARSON</span>
@@ -251,6 +692,325 @@ footer a:hover { color: var(--muted); }
   const HOURS = 168;
   const POLL_MS = 5 * 60 * 1000;
 
+  /* ═══════════════════════════════════════════════════
+     DECORRELATION ALERT ENGINE
+     ═══════════════════════════════════════════════════ */
+
+  const ALERT_SIGMA = 2;              // standard-deviation threshold
+  const ALERT_MIN_SAMPLES = 6;        // min polls before alerting (30 min at 5m interval)
+  const ALERT_COOLDOWN_MS = 30 * 60 * 1000; // 30-min cooldown per alt
+  const ALERT_MAX_HISTORY = 100;      // cap localStorage entries
+  const ALERT_BANNER_MS = 12000;      // banner auto-dismiss
+  const LS_CORR_HISTORY = "el5_corr_history";
+  const LS_ALERT_LOG = "el5_alert_log";
+
+  // ── Correlation history: { symbol: [{ t, r }] } ──
+  function loadCorrHistory() {
+    try { return JSON.parse(localStorage.getItem(LS_CORR_HISTORY)) || {}; }
+    catch { return {}; }
+  }
+  function saveCorrHistory(h) {
+    // Keep only the most recent 200 entries per symbol to bound storage
+    const trimmed = {};
+    for (const sym of Object.keys(h)) {
+      trimmed[sym] = h[sym].slice(-200);
+    }
+    localStorage.setItem(LS_CORR_HISTORY, JSON.stringify(trimmed));
+  }
+  function pushCorr(history, symbol, corrValue) {
+    if (!Number.isFinite(corrValue)) return;
+    if (!history[symbol]) history[symbol] = [];
+    history[symbol].push({ t: Date.now(), r: corrValue });
+  }
+
+  // ── Statistics ──
+  function trailingStats(arr) {
+    if (!arr || arr.length < ALERT_MIN_SAMPLES) return null;
+    const vals = arr.map(e => e.r);
+    const n = vals.length;
+    const mean = vals.reduce((s, v) => s + v, 0) / n;
+    const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+    const stddev = Math.sqrt(variance);
+    return { mean, stddev, n };
+  }
+
+  // ── Alert log (localStorage) ──
+  function loadAlertLog() {
+    try { return JSON.parse(localStorage.getItem(LS_ALERT_LOG)) || []; }
+    catch { return []; }
+  }
+  function saveAlertLog(log) {
+    localStorage.setItem(LS_ALERT_LOG, JSON.stringify(log.slice(-ALERT_MAX_HISTORY)));
+  }
+  function logAlert(entry) {
+    const log = loadAlertLog();
+    log.push(entry);
+    saveAlertLog(log);
+    renderHistoryPanel();
+  }
+
+  // ── Cooldown tracker (in-memory) ──
+  const lastAlertTime = {};
+
+  // ── Audio chime via Web Audio API ──
+  // AudioContext must be created/resumed on a user gesture to avoid autoplay blocking.
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  }
+  // Bootstrap on first user interaction so chimes work on automatic alerts
+  document.addEventListener("click", ensureAudio, { once: false });
+  document.addEventListener("keydown", ensureAudio, { once: false });
+
+  function playChime() {
+    try {
+      ensureAudio();
+      if (audioCtx.state !== "running") return; // still blocked, skip silently
+      const now = audioCtx.currentTime;
+
+      // Two-tone cyberpunk ping: high note then resolve
+      [880, 660].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.18, now + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now + i * 0.12);
+        osc.stop(now + i * 0.12 + 0.4);
+      });
+    } catch (e) { /* audio not available */ }
+  }
+
+  // ── On-screen alert banners ──
+  const alertContainer = document.getElementById("alert-container");
+
+  function showAlertBanner(symbol, currentCorr, mean, deviation, sigma) {
+    const dir = deviation < 0 ? "▼ DROPPED" : "▲ SPIKED";
+    const banner = document.createElement("div");
+    banner.className = "alert-banner";
+    banner.innerHTML =
+      `<span class="alert-icon">⚡</span>` +
+      `<span class="alert-body">` +
+        `<span class="alert-sym">$${symbol}</span> ${dir} · ` +
+        `r = <span class="alert-val">${currentCorr.toFixed(3)}</span> ` +
+        `(μ ${mean.toFixed(3)} ± ${sigma.toFixed(3)}, ${Math.abs(deviation / sigma).toFixed(1)}σ)` +
+      `</span>` +
+      `<span class="alert-time">${new Date().toISOString().substring(11, 19)}Z</span>` +
+      `<button class="alert-dismiss" title="Dismiss">✕</button>`;
+
+    banner.querySelector(".alert-dismiss").addEventListener("click", () => dismissBanner(banner));
+    alertContainer.prepend(banner);
+    playChime();
+
+    // Auto-dismiss after ALERT_BANNER_MS
+    setTimeout(() => dismissBanner(banner), ALERT_BANNER_MS);
+  }
+
+  function dismissBanner(banner) {
+    if (banner.classList.contains("fade-out")) return;
+    banner.classList.add("fade-out");
+    setTimeout(() => banner.remove(), 400);
+  }
+
+  // ── History panel ──
+  const historyPanel = document.getElementById("alert-history-panel");
+  const historyList = document.getElementById("history-list");
+  const historyBtn = document.getElementById("alert-history-btn");
+  const historyCloseBtn = document.getElementById("history-close-btn");
+  const historyClearBtn = document.getElementById("history-clear-btn");
+  const alertBadge = document.getElementById("alert-badge");
+
+  let unseenCount = 0;
+
+  historyBtn.addEventListener("click", () => {
+    historyPanel.classList.toggle("open");
+    if (historyPanel.classList.contains("open")) {
+      unseenCount = 0;
+      updateBadge();
+    }
+  });
+  historyCloseBtn.addEventListener("click", () => historyPanel.classList.remove("open"));
+  historyClearBtn.addEventListener("click", () => {
+    saveAlertLog([]);
+    renderHistoryPanel();
+  });
+
+  function updateBadge() {
+    if (unseenCount > 0) {
+      alertBadge.textContent = unseenCount > 9 ? "9+" : unseenCount;
+      alertBadge.classList.remove("hidden");
+    } else {
+      alertBadge.classList.add("hidden");
+    }
+  }
+
+  function renderHistoryPanel() {
+    const log = loadAlertLog();
+    if (log.length === 0) {
+      historyList.innerHTML = '<div class="history-empty">NO ALERTS YET<br><br>Alerts fire when an alt\'s correlation<br>deviates &gt;2σ from its trailing mean.</div>';
+      return;
+    }
+    historyList.innerHTML = "";
+    // Show newest first
+    for (let i = log.length - 1; i >= 0; i--) {
+      const a = log[i];
+      const item = document.createElement("div");
+      item.className = "history-item";
+      const dir = a.deviation < 0 ? "▼" : "▲";
+      item.innerHTML =
+        `<div class="history-item-top">` +
+          `<span class="history-item-sym">${dir} $${a.symbol}</span>` +
+          `<span class="history-item-time">${new Date(a.t).toISOString().substring(0, 19).replace("T", " ")}Z</span>` +
+        `</div>` +
+        `<div class="history-item-detail">` +
+          `r = ${a.corr.toFixed(3)} · μ ${a.mean.toFixed(3)} ± ${a.stddev.toFixed(3)} · ${Math.abs(a.deviation / a.stddev).toFixed(1)}σ` +
+        `</div>`;
+      historyList.appendChild(item);
+    }
+  }
+  renderHistoryPanel(); // initial render from localStorage
+
+  // ── Core detection: called per-alt after each poll ──
+  function checkDecorrelation(symbol, currentCorr, corrHistory) {
+    const stats = trailingStats(corrHistory[symbol]);
+    if (!stats) return; // not enough data yet
+
+    const deviation = currentCorr - stats.mean;
+    const absDeviation = Math.abs(deviation);
+
+    // Guard: if stddev is essentially zero (alt hasn't moved), skip
+    if (stats.stddev < 0.005) return;
+
+    if (absDeviation > ALERT_SIGMA * stats.stddev) {
+      // Check cooldown
+      const now = Date.now();
+      if (lastAlertTime[symbol] && (now - lastAlertTime[symbol]) < ALERT_COOLDOWN_MS) return;
+      lastAlertTime[symbol] = now;
+
+      // Fire!
+      showAlertBanner(symbol, currentCorr, stats.mean, deviation, stats.stddev);
+      logAlert({
+        t: now,
+        symbol,
+        corr: currentCorr,
+        mean: stats.mean,
+        stddev: stats.stddev,
+        deviation
+      });
+
+      if (!historyPanel.classList.contains("open")) {
+        unseenCount++;
+        updateBadge();
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     END ALERT ENGINE
+     ═══════════════════════════════════════════════════ */
+
+  /* ═══════════════════════════════════════════════════
+     REGIME DETECTION
+     ─────────────────────────────────────────────────
+     4 regimes based on two axes:
+       1. Average |correlation| across alts (tight vs. loose)
+       2. Directional consensus (are alts confirming BTC's move?)
+
+     HERD     high avg|r| + high consensus   → everything locked together
+     PANIC    high avg|r| + all dropping hard → correlated selloff
+     ROTATION low-mid avg|r| + low consensus  → money rotating between alts
+     DRIFT    low avg|r| + quiet / mixed      → alts wandering independently
+     ═══════════════════════════════════════════════════ */
+
+  const REGIME_CORR_TIGHT = 0.65;   // above = "tight" correlation
+  const REGIME_CORR_LOOSE = 0.45;   // below = "loose" correlation
+  const REGIME_CONSENSUS_HIGH = 0.7; // 70%+ alts confirming direction
+  const REGIME_PANIC_DROP = -0.03;   // 24h drop threshold for panic (-3%)
+
+  const REGIMES = {
+    HERD:     { label: "HERD",     color: "#39ff14" }, // green — everything in sync
+    PANIC:    { label: "PANIC",    color: "#ff5500" }, // orange — correlated selloff
+    ROTATION: { label: "ROTATION", color: "#00f0ff" }, // cyan — money moving between alts
+    DRIFT:    { label: "DRIFT",    color: "#7a8aff" }, // muted blue — quiet divergence
+  };
+
+  /**
+   * @param {Array<{corr: number|null, bias24h: number|null}>} peerData
+   * @param {number|null} focusBias24h - BTC's 24h change
+   * @returns {{ label: string, color: string }}
+   */
+  function classifyRegime(peerData, focusBias24h) {
+    // Filter to alts with valid data
+    const valid = peerData.filter(p => p.corr !== null && p.bias24h !== null);
+    if (valid.length < 3) return REGIMES.DRIFT; // not enough data
+
+    // Axis 1: average |correlation|
+    const avgAbsCorr = valid.reduce((s, p) => s + Math.abs(p.corr), 0) / valid.length;
+
+    // Axis 2: directional consensus (what fraction move same direction as BTC?)
+    const focusUp = focusBias24h !== null && focusBias24h >= 0;
+    let sameDir = 0;
+    let allDropping = true;
+    for (const p of valid) {
+      const peerUp = p.bias24h >= 0;
+      const inverse = p.corr < 0;
+      const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
+      if (aligned) sameDir++;
+      if (p.bias24h > REGIME_PANIC_DROP) allDropping = false;
+    }
+    const consensus = sameDir / valid.length;
+
+    // Avg 24h bias across all alts
+    const avgBias = valid.reduce((s, p) => s + p.bias24h, 0) / valid.length;
+
+    // Classification
+    const tight = avgAbsCorr >= REGIME_CORR_TIGHT;
+    const loose = avgAbsCorr < REGIME_CORR_LOOSE;
+
+    // PANIC: tight correlation + everything dumping hard
+    if (tight && allDropping && focusBias24h !== null && focusBias24h < REGIME_PANIC_DROP && avgBias < REGIME_PANIC_DROP) {
+      return REGIMES.PANIC;
+    }
+
+    // HERD: tight correlation + strong directional consensus
+    if (tight && consensus >= REGIME_CONSENSUS_HIGH) {
+      return REGIMES.HERD;
+    }
+
+    // ROTATION: loose-to-mid correlation + low consensus (alts going different directions)
+    if (consensus < REGIME_CONSENSUS_HIGH && !tight) {
+      return REGIMES.ROTATION;
+    }
+
+    // DRIFT: loose correlation, quiet market
+    if (loose) {
+      return REGIMES.DRIFT;
+    }
+
+    // Fallback: mid-range correlation with decent consensus → mild herd
+    if (consensus >= REGIME_CONSENSUS_HIGH) {
+      return REGIMES.HERD;
+    }
+
+    return REGIMES.DRIFT;
+  }
+
+  const regimeLabel = document.getElementById("regime-label");
+
+  function updateRegimeLabel(regime) {
+    regimeLabel.textContent = "▌ " + regime.label;
+    regimeLabel.setAttribute("fill", regime.color);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     END REGIME DETECTION
+     ═══════════════════════════════════════════════════ */
+
   const CX = 400, CY = 400;
   const RING_INNER = 90;
   const RING_OUTER = 320;
@@ -267,6 +1027,24 @@ footer a:hover { color: var(--muted); }
   const clockEl = document.getElementById("clock");
   const focusPriceEl = document.getElementById("focus-price");
   const focusVerdictEl = document.getElementById("focus-verdict");
+  const focusGlowEl = document.getElementById("focus-glow");
+  const focusHexEl = document.getElementById("focus-hex");
+  const focusTickerEl = document.getElementById("focus-ticker");
+
+  function updateFocusColor(up) {
+    // null/undefined = no data → magenta fallback
+    if (up === null || up === undefined) {
+      focusGlowEl.setAttribute("fill", "url(#fg)");
+      focusHexEl.setAttribute("stroke", "#ff10f0");
+      focusTickerEl.setAttribute("fill", "#ff10f0");
+      return;
+    }
+    const color = up ? "#e8e8ff" : "#ff10f0";
+    const glowId = up ? "fgu" : "fgd";
+    focusGlowEl.setAttribute("fill", `url(#${glowId})`);
+    focusHexEl.setAttribute("stroke", color);
+    focusTickerEl.setAttribute("fill", color);
+  }
 
   function setStatus(state, text) {
     dot.className = "status-dot " + (state || "");
@@ -363,7 +1141,7 @@ footer a:hover { color: var(--muted); }
     return RING_INNER + (RING_OUTER - RING_INNER) * (1 - mag);
   }
 
-  function renderPeer(i, symbol, corr, bias24h) {
+  function renderPeer(i, symbol, corr, bias24h, volRatio) {
     const angle = peerAngle(i);
     const r = corrToRadius(corr);
     const x = CX + r * Math.cos(angle);
@@ -372,6 +1150,12 @@ footer a:hover { color: var(--muted); }
     const isInverse = corr !== null && corr < 0;
     const color = isUp ? "#39ff14" : "#ff5500";
     const glowId = isUp ? "ug" : "dg";
+
+    // Vol-adjusted scaling: volRatio = peer_vol / btc_vol
+    // >1 means more volatile than BTC → bigger hex; <1 → smaller
+    const vScale = Math.min(1.8, Math.max(0.6, volRatio || 1));
+    const hexR = PEER_HEX_R * vScale;
+    const strokeW = 1.4 * Math.min(1.5, Math.max(0.7, vScale));
 
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", CX); line.setAttribute("y1", CY);
@@ -384,15 +1168,15 @@ footer a:hover { color: var(--muted); }
 
     const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
-    glow.setAttribute("r", PEER_HEX_R + 8);
+    glow.setAttribute("r", hexR + 8);
     glow.setAttribute("fill", `url(#${glowId})`);
     peersG.appendChild(glow);
 
     const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    hex.setAttribute("points", hexPath(x, y, PEER_HEX_R));
+    hex.setAttribute("points", hexPath(x, y, hexR));
     hex.setAttribute("fill", "#0a0a14");
     hex.setAttribute("stroke", color);
-    hex.setAttribute("stroke-width", "1.4");
+    hex.setAttribute("stroke-width", strokeW.toFixed(1));
     if (isInverse) hex.setAttribute("stroke-dasharray", "3 2");
     peersG.appendChild(hex);
 
@@ -407,7 +1191,7 @@ footer a:hover { color: var(--muted); }
     ticker.textContent = "$" + symbol;
     peersG.appendChild(ticker);
 
-    const cornerOff = PEER_HEX_R + 12;
+    const cornerOff = hexR + 12;
     const lx = x + cornerOff * Math.cos(angle);
     const ly = y + cornerOff * Math.sin(angle);
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -421,7 +1205,781 @@ footer a:hover { color: var(--muted); }
     peersG.appendChild(label);
   }
 
+  /* ═══════════════════════════════════════════════════
+     ANTI-RADAR: DIVERSIFICATION VIEW
+     ─────────────────────────────────────────────────
+     Flips the radar: best diversifiers (low |corr|) close to center,
+     redundant alts (high |corr|) pushed to the rim.
+
+     Scoring:
+       diversification score = 1 - |corr|   (0 = redundant, 1 = perfect diversifier)
+       weight = inverse-vol × divScore, normalized to 100%
+     ═══════════════════════════════════════════════════ */
+
+  let viewMode = "radar"; // "radar" | "diversify"
+  let lastComputedData = null; // cached for re-renders on toggle
+
+  const viewToggle = document.getElementById("view-toggle");
+  const ringsG = document.getElementById("rings");
+
+  const ORIG_RING_LABELS = [
+    { x: 724, text: "0.0" },
+    { x: 644, text: "0.5" },
+    { x: 564, text: "0.8" },
+  ];
+  const DIV_RING_LABELS = [
+    { x: 724, text: "WEAK" },
+    { x: 644, text: "MID" },
+    { x: 564, text: "BEST" },
+  ];
+
+  function computeVolatility(series) {
+    if (!series || series.length < 24) return null;
+    const rets = [];
+    for (let i = 1; i < series.length; i++) {
+      const prev = series[i-1].close, curr = series[i].close;
+      if (prev > 0 && curr > 0) rets.push(Math.log(curr / prev));
+    }
+    if (rets.length < 10) return null;
+    const mean = rets.reduce((s, v) => s + v, 0) / rets.length;
+    const variance = rets.reduce((s, v) => s + (v - mean) ** 2, 0) / rets.length;
+    return Math.sqrt(variance);
+  }
+
+  function computeDiversificationScores(peerResults) {
+    const valid = peerResults
+      .map(p => ({ ...p })) // shallow copy to avoid mutating cached data
+      .filter(p => p.corr !== null && p.vol !== null && p.vol > 0);
+    if (valid.length === 0) return peerResults.map(p => ({ ...p, divScore: null, weight: null }));
+
+    for (const p of valid) {
+      p.divScore = 1 - Math.min(1, Math.abs(p.corr));
+    }
+
+    let totalRaw = 0;
+    for (const p of valid) {
+      p.rawWeight = (1 / p.vol) * p.divScore;
+      totalRaw += p.rawWeight;
+    }
+    for (const p of valid) {
+      p.weight = totalRaw > 0 ? p.rawWeight / totalRaw : 0;
+    }
+
+    return peerResults.map(p => {
+      const match = valid.find(v => v.symbol === p.symbol);
+      return match || { ...p, divScore: null, weight: null };
+    });
+  }
+
+  // Best diversifiers (high divScore) CLOSE to center, redundant FAR
+  function divScoreToRadius(divScore) {
+    if (!Number.isFinite(divScore)) return RING_OUTER;
+    const clamped = Math.min(1, Math.max(0, divScore));
+    return RING_INNER + (RING_OUTER - RING_INNER) * (1 - clamped);
+  }
+
+  function renderDiversifyPeer(i, peerData) {
+    const { symbol, corr, divScore, weight, volRatio } = peerData;
+    const angle = peerAngle(i);
+    const r = divScoreToRadius(divScore);
+    const x = CX + r * Math.cos(angle);
+    const y = CY + r * Math.sin(angle);
+
+    // Vol-adjusted scaling (same logic as radar mode)
+    const vScale = Math.min(1.8, Math.max(0.6, volRatio || 1));
+    const hexR = PEER_HEX_R * vScale;
+    const strokeW = 1.4 * Math.min(1.5, Math.max(0.7, vScale));
+
+    const quality = divScore !== null ? divScore : 0;
+    const color = quality >= 0.5 ? "#39ff14" :
+                  quality >= 0.25 ? "#00f0ff" :
+                  quality >= 0.1 ? "#7a8aff" : "#ff5500";
+    const glowId = quality >= 0.5 ? "ug" : quality < 0.1 ? "dg" : "ug";
+
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", CX); line.setAttribute("y1", CY);
+    line.setAttribute("x2", x.toFixed(1)); line.setAttribute("y2", y.toFixed(1));
+    line.setAttribute("stroke", color);
+    line.setAttribute("stroke-width", "0.5");
+    line.setAttribute("stroke-dasharray", "3 3");
+    line.setAttribute("opacity", "0.3");
+    linesG.appendChild(line);
+
+    const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
+    glow.setAttribute("r", hexR + 8);
+    glow.setAttribute("fill", `url(#${glowId})`);
+    peersG.appendChild(glow);
+
+    const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    hex.setAttribute("points", hexPath(x, y, hexR));
+    hex.setAttribute("fill", "#0a0a14");
+    hex.setAttribute("stroke", color);
+    hex.setAttribute("stroke-width", strokeW.toFixed(1));
+    peersG.appendChild(hex);
+
+    const ticker = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    ticker.setAttribute("x", x.toFixed(1));
+    ticker.setAttribute("y", (y - 2).toFixed(1));
+    ticker.setAttribute("text-anchor", "middle");
+    ticker.setAttribute("fill", color);
+    ticker.setAttribute("font-size", "10");
+    ticker.setAttribute("font-weight", "700");
+    ticker.setAttribute("font-family", "JetBrains Mono, monospace");
+    ticker.textContent = "$" + symbol;
+    peersG.appendChild(ticker);
+
+    const wtText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    wtText.setAttribute("x", x.toFixed(1));
+    wtText.setAttribute("y", (y + 10).toFixed(1));
+    wtText.setAttribute("text-anchor", "middle");
+    wtText.setAttribute("fill", color);
+    wtText.setAttribute("font-size", "9");
+    wtText.setAttribute("font-weight", "700");
+    wtText.setAttribute("font-family", "JetBrains Mono, monospace");
+    wtText.setAttribute("opacity", "0.8");
+    wtText.textContent = weight !== null ? (weight * 100).toFixed(1) + "%" : "—";
+    peersG.appendChild(wtText);
+
+    const cornerOff = hexR + 12;
+    const lx = x + cornerOff * Math.cos(angle);
+    const ly = y + cornerOff * Math.sin(angle);
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", lx.toFixed(1));
+    label.setAttribute("y", ly.toFixed(1));
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("fill", "#7a8aff");
+    label.setAttribute("font-size", "9");
+    label.setAttribute("font-family", "JetBrains Mono, monospace");
+    label.textContent = divScore !== null ? "d:" + divScore.toFixed(2) : "—";
+    peersG.appendChild(label);
+  }
+
+  function updateRingLabels(mode) {
+    const texts = ringsG.querySelectorAll("text.corr-label");
+    const labels = mode === "diversify" ? DIV_RING_LABELS : ORIG_RING_LABELS;
+    texts.forEach((t, i) => {
+      if (labels[i]) t.textContent = labels[i].text;
+    });
+  }
+
+  function renderView(data) {
+    if (!data) return;
+    linesG.innerHTML = "";
+    peersG.innerHTML = "";
+
+    if (viewMode === "diversify") {
+      updateRingLabels("diversify");
+      const scored = computeDiversificationScores(data.peerResults);
+      scored.forEach((p, i) => renderDiversifyPeer(i, p));
+
+      focusPriceEl.textContent = "YOUR HOLD";
+      focusVerdictEl.textContent = "DIVERSIFY ↓";
+      focusVerdictEl.setAttribute("fill", "#00f0ff");
+      updateFocusColor(null); // magenta in diversify mode
+      regimeLabel.textContent = "▌ ADD ALTS BY SCORE";
+      regimeLabel.setAttribute("fill", "#3a3a55");
+    } else {
+      updateRingLabels("radar");
+      data.peerResults.forEach((p, i) => renderPeer(i, p.symbol, p.corr, p.bias24h, p.volRatio));
+
+      focusPriceEl.textContent = fmtPrice(data.focusLast);
+      const pct = data.totalCount > 0 ? Math.round((data.confirmCount / data.totalCount) * 100) : 0;
+      const arrow = data.focusUp ? "▲" : "▼";
+      focusVerdictEl.textContent = `${pct}% ${arrow}`;
+      focusVerdictEl.setAttribute("fill", data.focusUp ? "#e8e8ff" : "#ff10f0");
+      updateFocusColor(data.focusUp);
+      const regime = classifyRegime(data.peerResults.map(p => ({ corr: p.corr, bias24h: p.bias24h })), data.focusChg);
+      updateRegimeLabel(regime);
+    }
+
+  }
+
+  viewToggle.addEventListener("click", () => {
+    viewMode = viewMode === "radar" ? "diversify" : "radar";
+    viewToggle.classList.toggle("active", viewMode === "diversify");
+    viewToggle.textContent = viewMode === "diversify" ? "▌ RADAR" : "▌ DIVERSIFY";
+    renderView(lastComputedData);
+  });
+
+  /* ═══════════════════════════════════════════════════
+     END ANTI-RADAR
+     ═══════════════════════════════════════════════════ */
+
+  /* ═══════════════════════════════════════════════════
+     HISTORICAL REPLAY
+     ─────────────────────────────────────────────────
+     Loads replay.json (pre-computed from spike CSVs),
+     steps through frames, renders each snapshot using
+     the same renderView pipeline.
+     ═══════════════════════════════════════════════════ */
+
+  let replayMode = false;
+  let replayData = null;       // { peers, frames }
+  let replayIndex = 0;
+  let replayPlaying = false;
+  let replayTimer = null;
+  let replaySpeed = 1;         // frames per tick
+  let replayIntervalMs = 250;  // base tick rate
+  let livePollTimer = null;    // saved live poll interval ID
+
+  const replayBar = document.getElementById("replay-bar");
+  const replayBadge = document.getElementById("replay-badge");
+  const replayPlayBtn = document.getElementById("replay-play");
+  const replayScrub = document.getElementById("replay-scrub");
+  const replayTsEl = document.getElementById("replay-ts");
+  const replayExitBtn = document.getElementById("replay-exit");
+  const replayEnterBtn = document.getElementById("replay-enter-btn");
+  const speedBtns = document.querySelectorAll(".speed-btn");
+
+  async function loadReplayData() {
+    // Try CSV-derived replay.json first
+    try {
+      const r = await fetch("/data/replay.json");
+      if (r.ok) {
+        const data = await r.json();
+        if (data.frames && data.frames.length > 0) return data;
+      }
+    } catch (e) {
+      console.warn("replay.json not available:", e.message);
+    }
+
+    // Fallback: fetch last 7 days from Coinbase and build frames
+    console.log("Falling back to Coinbase API for replay data...");
+    setStatus("fetching", "LOADING REPLAY...");
+
+    const hours = 168;
+    const granularity = 3600;
+    const seriesByToken = {};
+    for (const sym of [FOCUS, ...PEERS]) {
+      try {
+        const candles = await fetchCandles(sym);
+        if (candles && candles.length >= 24) seriesByToken[sym] = candles;
+      } catch (e) {
+        console.warn(`replay fetch failed for ${sym}:`, e.message);
+      }
+      await new Promise(r => setTimeout(r, 120));
+    }
+
+    const focusSeries = seriesByToken[FOCUS];
+    if (!focusSeries || focusSeries.length < 48) return null;
+
+    // Build frames from available data — step every 4 hours
+    const frames = [];
+    const focusRets = logReturns(focusSeries);
+    const focusRetMap = new Map(focusRets.map(p => [p.t, p.r]));
+
+    for (let idx = 48; idx < focusSeries.length; idx += 4) {
+      const ts = focusSeries[idx].t;
+      const btcPrice = focusSeries[idx].close;
+
+      // Compute correlations using data up to this point
+      const windowStart = Math.max(0, idx - 168);
+      const focusWindow = focusSeries.slice(windowStart, idx + 1);
+      const focusWinRets = logReturns(focusWindow);
+
+      const corrs = [];
+      const biases = [];
+      const vols = [];
+
+      for (const sym of PEERS) {
+        const series = seriesByToken[sym];
+        if (!series) {
+          corrs.push(null); biases.push(null); vols.push(null);
+          continue;
+        }
+
+        // Find matching window
+        const peerWindow = series.filter(s => s.t >= focusWindow[0].t && s.t <= focusWindow[focusWindow.length - 1].t);
+        const peerRets = logReturns(peerWindow);
+        const [xs, ys] = alignReturns(focusWinRets, peerRets);
+        const c = pearson(xs, ys);
+        corrs.push(c !== null ? Math.round(c * 10000) / 10000 : null);
+
+        // 24h bias
+        const peerIdx = series.findIndex(s => s.t === ts);
+        if (peerIdx >= 24) {
+          const prev = series[peerIdx - 24].close;
+          const curr = series[peerIdx].close;
+          biases.push(prev > 0 ? Math.round(((curr - prev) / prev) * 100000) / 100000 : null);
+        } else {
+          biases.push(null);
+        }
+
+        // Vol
+        const v = computeVolatility(peerWindow);
+        vols.push(v);
+      }
+
+      const isoTs = new Date(ts * 1000).toISOString().replace(/\.\d+Z$/, "Z");
+      frames.push({
+        t: isoTs,
+        btc: Math.round(btcPrice * 100) / 100,
+        corr: corrs,
+        bias: biases,
+        vol: vols,
+      });
+    }
+
+    return { peers: PEERS.slice(), frames };
+  }
+
+  function replayFrameToData(frame) {
+    // Convert a replay frame into the format renderView expects
+    // Compute BTC vol from surrounding replay frames for volRatio
+    let btcVol = null;
+    if (replayData && replayIndex >= 42) {
+      // Use trailing 42 frames (~168h at 4h spacing) of BTC prices for vol
+      const btcRets = [];
+      for (let j = replayIndex - 41; j <= replayIndex; j++) {
+        const prev = replayData.frames[j - 1].btc;
+        const curr = replayData.frames[j].btc;
+        if (prev > 0 && curr > 0) btcRets.push(Math.log(curr / prev));
+      }
+      if (btcRets.length >= 10) {
+        const mean = btcRets.reduce((s, v) => s + v, 0) / btcRets.length;
+        const variance = btcRets.reduce((s, v) => s + (v - mean) ** 2, 0) / btcRets.length;
+        btcVol = Math.sqrt(variance);
+      }
+    }
+
+    const peerResults = replayData.peers.map((sym, i) => {
+      const vol = frame.vol[i];
+      let volRatio = null;
+      if (vol !== null && btcVol !== null && btcVol > 0) {
+        volRatio = vol / btcVol;
+      }
+      return {
+        symbol: sym,
+        corr: frame.corr[i],
+        bias24h: frame.bias[i],
+        vol,
+        volRatio,
+      };
+    });
+
+    // Compute BTC 24h bias from replay frames (look back ~6 frames = 24h at 4h spacing)
+    let btcBias = null;
+    const lookback = 6;
+    if (replayData && replayIndex >= lookback) {
+      const prevBtc = replayData.frames[replayIndex - lookback].btc;
+      if (prevBtc > 0) btcBias = (frame.btc - prevBtc) / prevBtc;
+    }
+    const focusUp = btcBias !== null ? btcBias >= 0 : true;
+
+    let confirmCount = 0, totalCount = 0;
+    for (const p of peerResults) {
+      if (p.corr !== null && p.bias24h !== null) {
+        totalCount++;
+        const peerUp = p.bias24h >= 0;
+        const inverse = p.corr < 0;
+        const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
+        if (aligned) confirmCount++;
+      }
+    }
+
+    return {
+      peerResults,
+      focusLast: frame.btc,
+      focusChg: btcBias,
+      focusUp,
+      confirmCount,
+      totalCount,
+    };
+  }
+
+  function renderReplayFrame() {
+    if (!replayData || !replayData.frames[replayIndex]) return;
+    const frame = replayData.frames[replayIndex];
+    const data = replayFrameToData(frame);
+
+    // Update the cached data so the diversify toggle works during replay
+    lastComputedData = data;
+    renderView(data);
+
+    // Update scrub bar and timestamp
+    replayScrub.value = replayIndex;
+    const ts = frame.t.replace("T", " ").replace("Z", " UTC");
+    replayTsEl.textContent = ts;
+  }
+
+  function replayTick() {
+    if (!replayPlaying || !replayData) return;
+    replayIndex += replaySpeed;
+    if (replayIndex >= replayData.frames.length) {
+      replayIndex = replayData.frames.length - 1;
+      pauseReplay();
+      return;
+    }
+    renderReplayFrame();
+  }
+
+  function playReplay() {
+    replayPlaying = true;
+    replayPlayBtn.textContent = "⏸";
+    replayPlayBtn.classList.add("active");
+    replayTimer = setInterval(replayTick, replayIntervalMs);
+  }
+
+  function pauseReplay() {
+    replayPlaying = false;
+    replayPlayBtn.textContent = "▶";
+    replayPlayBtn.classList.remove("active");
+    if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+  }
+
+  async function enterReplayMode() {
+    if (replayMode) return;
+    setStatus("fetching", "LOADING REPLAY...");
+    replayEnterBtn.textContent = "▌ LOADING...";
+
+    replayData = await loadReplayData();
+    if (!replayData || replayData.frames.length === 0) {
+      setStatus("error", "NO REPLAY DATA");
+      replayEnterBtn.textContent = "▌ REPLAY";
+      return;
+    }
+
+    replayMode = true;
+    replayIndex = 0;
+
+    // Pause live polling
+    // (The live poll is set up via setInterval in the main flow — we'll track it)
+
+    // Show replay UI
+    replayBar.classList.add("active");
+    replayBadge.classList.add("active");
+    replayEnterBtn.style.display = "none";
+
+    // Configure scrub bar
+    replayScrub.max = replayData.frames.length - 1;
+    replayScrub.value = 0;
+
+    // Render first frame
+    renderReplayFrame();
+    setStatus("", "REPLAY");
+  }
+
+  function exitReplayMode() {
+    replayMode = false;
+    pauseReplay();
+    replayData = null;
+
+    replayBar.classList.remove("active");
+    replayBadge.classList.remove("active");
+    replayEnterBtn.style.display = "";
+    replayEnterBtn.textContent = "▌ REPLAY";
+
+    // Trigger a live refresh
+    loadAndRender();
+  }
+
+  // Event listeners
+  replayEnterBtn.addEventListener("click", enterReplayMode);
+  replayExitBtn.addEventListener("click", exitReplayMode);
+
+  replayPlayBtn.addEventListener("click", () => {
+    if (replayPlaying) pauseReplay();
+    else playReplay();
+  });
+
+  replayScrub.addEventListener("input", () => {
+    pauseReplay();
+    replayIndex = parseInt(replayScrub.value, 10);
+    renderReplayFrame();
+  });
+
+  speedBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      speedBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      replaySpeed = parseInt(btn.dataset.speed, 10);
+      // If playing, restart timer with new speed
+      if (replayPlaying) {
+        clearInterval(replayTimer);
+        replayTimer = setInterval(replayTick, replayIntervalMs);
+      }
+    });
+  });
+
+  // Keyboard shortcuts for replay
+  document.addEventListener("keydown", (e) => {
+    if (!replayMode) return;
+    if (e.key === " " || e.key === "k") {
+      e.preventDefault();
+      if (replayPlaying) pauseReplay();
+      else playReplay();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      pauseReplay();
+      replayIndex = Math.min(replayIndex + 1, replayData.frames.length - 1);
+      renderReplayFrame();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      pauseReplay();
+      replayIndex = Math.max(replayIndex - 1, 0);
+      renderReplayFrame();
+    } else if (e.key === "Escape") {
+      exitReplayMode();
+    }
+  });
+
+  /* ═══════════════════════════════════════════════════
+     END REPLAY
+     ═══════════════════════════════════════════════════ */
+
+  /* ═══════════════════════════════════════════════════
+     SNAPSHOT: PNG EXPORT
+     ─────────────────────────────────────────────────
+     Renders the radar SVG to a canvas with dark background,
+     burns a watermark (el5.io + UTC timestamp), and triggers
+     a PNG download.
+     ═══════════════════════════════════════════════════ */
+
+  const snapshotBtn = document.getElementById("snapshot-btn");
+
+  function exportRadarPNG() {
+    const svgEl = document.getElementById("radar");
+    const serializer = new XMLSerializer();
+    let svgStr = serializer.serializeToString(svgEl);
+
+    // Inject inline styles for text elements (they rely on CSS that won't be in the exported SVG)
+    const styleBlock = `<style>
+      text { font-family: "JetBrains Mono", monospace; }
+      .corr-label { fill: #3a3a55; font-size: 9px; font-family: "JetBrains Mono", monospace; }
+    </style>`;
+    svgStr = svgStr.replace(/<svg([^>]*)>/, `<svg$1>${styleBlock}`);
+
+    // Canvas: 800×800 radar + 40px footer for watermark
+    const canvasW = 800, canvasH = 840;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW * 2;   // 2× for retina sharpness
+    canvas.height = canvasH * 2;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(2, 2);
+
+    // Dark background
+    ctx.fillStyle = "#07060e";
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    const img = new Image();
+    const blob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    img.onload = () => {
+      // Draw radar SVG
+      ctx.drawImage(img, 0, 0, canvasW, 800);
+      URL.revokeObjectURL(url);
+
+      // Watermark bar
+      ctx.fillStyle = "#0d0c18";
+      ctx.fillRect(0, 800, canvasW, 40);
+
+      // Watermark text
+      ctx.font = "500 10px 'JetBrains Mono', monospace";
+      ctx.letterSpacing = "0.12em";
+
+      // Left: el5.io branding
+      ctx.fillStyle = "#ff10f0";
+      ctx.textAlign = "left";
+      ctx.fillText("▌ EL5.IO", 16, 824);
+
+      // Right: UTC timestamp
+      const now = new Date();
+      const ts = now.toISOString().replace("T", " ").replace(/\.\d+Z$/, " UTC");
+      ctx.fillStyle = "#3a3a55";
+      ctx.textAlign = "right";
+      ctx.fillText(ts, canvasW - 16, 824);
+
+      // Trigger download
+      canvas.toBlob((pngBlob) => {
+        const a = document.createElement("a");
+        const dateStr = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        a.download = `el5-radar-${dateStr}.png`;
+        a.href = URL.createObjectURL(pngBlob);
+        a.click();
+        URL.revokeObjectURL(a.href);
+
+        // Flash feedback on button
+        snapshotBtn.textContent = "▌ SAVED";
+        snapshotBtn.classList.add("done");
+        setTimeout(() => {
+          snapshotBtn.textContent = "▌ SNAP";
+          snapshotBtn.classList.remove("done");
+        }, 1500);
+      }, "image/png");
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      console.error("Snapshot: SVG render failed");
+      snapshotBtn.textContent = "▌ ERROR";
+      setTimeout(() => { snapshotBtn.textContent = "▌ SNAP"; }, 2000);
+    };
+
+    // Flash to indicate capture
+    snapshotBtn.classList.add("flash");
+    setTimeout(() => snapshotBtn.classList.remove("flash"), 200);
+    img.src = url;
+  }
+
+  snapshotBtn.addEventListener("click", exportRadarPNG);
+
+  /* ═══════════════════════════════════════════════════
+     END SNAPSHOT
+     ═══════════════════════════════════════════════════ */
+
+  /* ═══════════════════════════════════════════════════
+     BTC PRICE CHANNEL
+     ─────────────────────────────────────────────────
+     Keltner-style channel: EMA(20) ± 2×ATR(14).
+     Three bands: upper breakout, current, lower breakout.
+     Price polyline shows last 24h of closes within the
+     current band. Computed from the Coinbase hourly
+     candles already fetched by loadAndRender.
+     ═══════════════════════════════════════════════════ */
+
+  const channelContainer = document.getElementById("channel-container");
+
+  function ema(values, period) {
+    const k = 2 / (period + 1);
+    const out = [values[0]];
+    for (let i = 1; i < values.length; i++) {
+      out.push(values[i] * k + out[i - 1] * (1 - k));
+    }
+    return out;
+  }
+
+  function computeChannel(series) {
+    // series: [{t, close, high?, low?}] sorted ascending
+    // We only have close from Coinbase candles, so use close for high/low proxy
+    if (!series || series.length < 30) return null;
+
+    const closes = series.map(s => s.close);
+    const emaPeriod = 20;
+    const atrPeriod = 14;
+
+    // EMA of closes
+    const emaLine = ema(closes, emaPeriod);
+
+    // ATR approximation from closes (since we only have close)
+    // Use absolute hourly changes as volatility proxy
+    const ranges = [0];
+    for (let i = 1; i < closes.length; i++) {
+      ranges.push(Math.abs(closes[i] - closes[i - 1]));
+    }
+    const atrLine = ema(ranges, atrPeriod);
+
+    const last = series.length - 1;
+    const mid = emaLine[last];
+    const atr = atrLine[last];
+    const mult = 2.0;
+
+    const current = { lower: mid - mult * atr, upper: mid + mult * atr };
+    const above   = { lower: current.upper, upper: current.upper + mult * atr };
+    const below   = { lower: current.lower - mult * atr, upper: current.lower };
+
+    // Last 24h of data for the polyline
+    const recent = series.slice(-24);
+
+    return { current, above, below, recent, price: closes[last], mid, atr };
+  }
+
+  function renderChannel(channelData) {
+    if (!channelData) {
+      channelContainer.innerHTML = "";
+      return;
+    }
+
+    const { current, above, below, recent, price } = channelData;
+    const W = 800, H = 140;
+    const PX_L = 10, PX_R = 80, PY_T = 8, PY_B = 16, GAP = 4;
+    const bandH = (H - PY_T - PY_B - 2 * GAP) / 3;
+    const bandW = W - PX_L - PX_R;
+    const yAbove = PY_T;
+    const yCurrent = PY_T + bandH + GAP;
+    const yBelow = PY_T + 2 * (bandH + GAP);
+
+    function priceToY(p, lo, hi, bandTopY) {
+      if (hi === lo) return bandTopY + bandH / 2;
+      const t = (p - lo) / (hi - lo);
+      return bandTopY + bandH * (1 - Math.max(0, Math.min(1, t)));
+    }
+
+    const fmt = (n) => Number.isFinite(n) ? "$" + n.toLocaleString(undefined, { maximumFractionDigits: 0 }) : "—";
+
+    // Price polyline inside current band
+    const pts = [];
+    if (recent.length > 1) {
+      const t0 = recent[0].t, t1 = recent[recent.length - 1].t;
+      const dt = Math.max(1, t1 - t0);
+      for (const bar of recent) {
+        const x = PX_L + bandW * ((bar.t - t0) / dt);
+        const y = priceToY(bar.close, current.lower, current.upper, yCurrent);
+        pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+      }
+    }
+
+    // Current price dot position — floats into adjacent band on breakout
+    const dotX = PX_L + bandW;
+    let dotY, dotBand = "current";
+    if (price > current.upper) {
+      dotY = priceToY(price, above.lower, above.upper, yAbove);
+      dotBand = "above";
+    } else if (price < current.lower) {
+      dotY = priceToY(price, below.lower, below.upper, yBelow);
+      dotBand = "below";
+    } else {
+      dotY = priceToY(price, current.lower, current.upper, yCurrent);
+    }
+
+    const svg = [
+      `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`,
+      `<defs>`,
+      `  <linearGradient id="ch-grad-up" x1="0" y1="0" x2="0" y2="1">`,
+      `    <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25"/>`,
+      `    <stop offset="100%" stop-color="#39ff14" stop-opacity="0.03"/>`,
+      `  </linearGradient>`,
+      `  <linearGradient id="ch-grad-dn" x1="0" y1="0" x2="0" y2="1">`,
+      `    <stop offset="0%" stop-color="#ff5500" stop-opacity="0.03"/>`,
+      `    <stop offset="100%" stop-color="#ff5500" stop-opacity="0.25"/>`,
+      `  </linearGradient>`,
+      `</defs>`,
+      // Upper band
+      `<rect class="ch-band" x="${PX_L}" y="${yAbove}" width="${bandW}" height="${bandH}" rx="3" fill="url(#ch-grad-up)"/>`,
+      `<text class="ch-label" x="${PX_L + bandW + 6}" y="${yAbove + 12}">UPPER</text>`,
+      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yAbove + 24}">${fmt(above.upper)}</text>`,
+      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yAbove + bandH - 2}">${fmt(above.lower)}</text>`,
+      // Current band
+      `<rect class="ch-band" x="${PX_L}" y="${yCurrent}" width="${bandW}" height="${bandH}" rx="3" fill="#13132a"/>`,
+      `<text class="ch-label" x="${PX_L + bandW + 6}" y="${yCurrent + 12}">CURRENT</text>`,
+      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yCurrent + 24}">${fmt(current.upper)}</text>`,
+      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yCurrent + bandH - 2}">${fmt(current.lower)}</text>`,
+      // Lower band
+      `<rect class="ch-band" x="${PX_L}" y="${yBelow}" width="${bandW}" height="${bandH}" rx="3" fill="url(#ch-grad-dn)"/>`,
+      `<text class="ch-label" x="${PX_L + bandW + 6}" y="${yBelow + 12}">LOWER</text>`,
+      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yBelow + 24}">${fmt(below.upper)}</text>`,
+      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yBelow + bandH - 2}">${fmt(below.lower)}</text>`,
+      // Price polyline
+      pts.length ? `<polyline class="ch-polyline" points="${pts.join(" ")}"/>` : "",
+      // Price dot
+      `<circle class="ch-dot" cx="${dotX.toFixed(1)}" cy="${dotY.toFixed(1)}" r="4"/>`,
+      // Time axis
+      `<text class="ch-time" x="${PX_L}" y="${H - 2}">T-24H</text>`,
+      `<text class="ch-time" x="${PX_L + bandW}" y="${H - 2}" text-anchor="end">NOW</text>`,
+      `</svg>`,
+    ];
+
+    channelContainer.innerHTML = svg.join("\n");
+  }
+
+  /* ═══════════════════════════════════════════════════
+     END CHANNEL
+     ═══════════════════════════════════════════════════ */
+
   async function loadAndRender() {
+    // Skip live updates while in replay mode
+    if (replayMode) return;
     setStatus("fetching", "FETCHING...");
     try {
       const seriesByToken = {};
@@ -441,8 +1999,7 @@ footer a:hover { color: var(--muted); }
       const focusRets = logReturns(focusSeries);
       const focusLast = focusSeries[focusSeries.length - 1].close;
       const focusChg = changePct24h(focusSeries);
-
-      focusPriceEl.textContent = fmtPrice(focusLast);
+      const focusVol = computeVolatility(focusSeries);
 
       linesG.innerHTML = "";
       peersG.innerHTML = "";
@@ -451,14 +2008,24 @@ footer a:hover { color: var(--muted); }
       let totalCount = 0;
       const focusUp = focusChg !== null && focusChg >= 0;
 
+      // Load correlation history for alert engine
+      const corrHistory = loadCorrHistory();
+
+      // Build per-alt result objects
+      const peerResults = [];
+
       PEERS.forEach((sym, i) => {
         const series = seriesByToken[sym];
-        let corr = null, bias = null;
+        let corr = null, bias = null, vol = null, volRatio = null;
         if (series) {
           const peerRets = logReturns(series);
           const [xs, ys] = alignReturns(focusRets, peerRets);
           corr = pearson(xs, ys);
           bias = changePct24h(series);
+          vol = computeVolatility(series);
+          if (vol !== null && focusVol !== null && focusVol > 0) {
+            volRatio = vol / focusVol;
+          }
           if (corr !== null && bias !== null) {
             totalCount++;
             const peerUp = bias >= 0;
@@ -466,13 +2033,35 @@ footer a:hover { color: var(--muted); }
             const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
             if (aligned) confirmCount++;
           }
+
+          // ── Alert engine: record + check ──
+          if (corr !== null) {
+            checkDecorrelation(sym, corr, corrHistory);
+            pushCorr(corrHistory, sym, corr);
+          }
         }
-        renderPeer(i, sym, corr, bias);
+        peerResults.push({ symbol: sym, corr, bias24h: bias, vol, volRatio });
       });
 
-      const arrow = focusUp ? "▲" : "▼";
-      focusVerdictEl.textContent = `${confirmCount}/${totalCount} ${arrow}`;
-      focusVerdictEl.setAttribute("fill", focusUp ? "#39ff14" : "#ff5500");
+      // Persist updated correlation history
+      saveCorrHistory(corrHistory);
+
+      // Cache computed data for view toggling
+      lastComputedData = {
+        peerResults,
+        focusLast,
+        focusChg,
+        focusUp,
+        confirmCount,
+        totalCount,
+      };
+
+      // Render current view
+      renderView(lastComputedData);
+
+      // Render BTC price channel
+      const channelData = computeChannel(focusSeries);
+      renderChannel(channelData);
 
       loading.classList.add("hidden");
       const stamp = new Date().toISOString().substring(11, 19);
