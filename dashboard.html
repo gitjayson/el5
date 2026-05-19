@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>el5.io · dashboard</title>
+<meta name="theme-color" content="#07070d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070d;
+  --panel: rgba(10, 10, 20, 0.55);
+  --border: rgba(122, 138, 255, 0.16);
+  --text: #e8e8ff;
+  --muted: #7a8aff;
+  --dim: #3a3a55;
+  --magenta: #ff10f0;
+  --green: #39ff14;
+  --orange: #ff5500;
+  --cyan: #00f0ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  color: var(--text);
+  background: var(--bg);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  min-height: 100vh;
+}
+.static {
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(122,138,255,0.18) 1px, transparent 1.2px),
+    radial-gradient(rgba(255,16,240,0.10) 1px, transparent 1.4px);
+  background-size: 3px 3px, 5px 5px;
+  background-position: 0 0, 1px 2px;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+.scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 2px,
+    rgba(0,0,0,0.20) 2px,
+    rgba(0,0,0,0.20) 3px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(7,7,13,0.92), rgba(7,7,13,0));
+  pointer-events: none;
+}
+header > * { pointer-events: auto; }
+.wordmark {
+  color: var(--magenta);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+}
+.wordmark .sep {
+  color: var(--dim);
+  margin: 0 10px;
+}
+.wordmark .panel-name {
+  color: var(--muted);
+  font-weight: 500;
+}
+.status {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+.status-clock { color: var(--cyan); }
+.status-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.status-dot.fetching { background: var(--cyan); animation-duration: 0.8s; }
+.status-dot.error { background: var(--orange); animation: none; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+main {
+  position: relative;
+  z-index: 5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 16px 60px;
+}
+#radar-wrap {
+  width: min(820px, 96vw);
+  aspect-ratio: 1 / 1;
+  max-height: calc(100vh - 130px);
+  position: relative;
+}
+#radar { width: 100%; height: 100%; display: block; }
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  background: rgba(7,7,13,0.6);
+  z-index: 20;
+}
+.loading-overlay.hidden { display: none; }
+footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 24px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  z-index: 10;
+  background: linear-gradient(to top, rgba(7,7,13,0.92), rgba(7,7,13,0));
+  pointer-events: none;
+}
+footer > * { pointer-events: auto; }
+footer a { color: inherit; text-decoration: none; }
+footer a:hover { color: var(--muted); }
+.ticker-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  fill: var(--text);
+}
+.corr-label {
+  font-family: 'JetBrains Mono', monospace;
+  fill: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+.tip {
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 0.18em;
+}
+@media (max-width: 600px) {
+  header { padding: 10px 14px; }
+  footer { padding: 10px 14px; font-size: 9px; }
+  .status { gap: 10px; }
+  .wordmark { font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="static" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<header>
+  <div class="wordmark">EL5.IO<span class="sep">▌</span><span class="panel-name">DASHBOARD</span></div>
+  <div class="status">
+    <span id="clock" class="status-clock">--:--:-- UTC</span>
+    <span class="status-refresh"><span id="dot" class="status-dot"></span><span id="dot-text">IDLE</span></span>
+  </div>
+</header>
+
+<main>
+  <div id="radar-wrap">
+    <div id="loading" class="loading-overlay">▌ TUNING THE STATIC...</div>
+    <svg id="radar" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="el5 crypto correlation radar">
+      <defs>
+        <radialGradient id="fg" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stop-color="#ff10f0" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#ff10f0" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ug" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stop-color="#39ff14" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#39ff14" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="dg" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stop-color="#ff5500" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#ff5500" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="rings">
+        <circle cx="400" cy="400" r="320" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+        <circle cx="400" cy="400" r="240" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+        <circle cx="400" cy="400" r="160" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
+        <text x="724" y="404" class="corr-label" text-anchor="start">0.0</text>
+        <text x="644" y="404" class="corr-label" text-anchor="start">0.5</text>
+        <text x="564" y="404" class="corr-label" text-anchor="start">0.8</text>
+      </g>
+      <g id="lines"></g>
+      <g id="peers"></g>
+      <g id="focus">
+        <circle cx="400" cy="400" r="62" fill="url(#fg)"/>
+        <polygon points="400,344 449,372 449,428 400,456 351,428 351,372" fill="#0a0a14" stroke="#ff10f0" stroke-width="1.6"/>
+        <text x="400" y="392" text-anchor="middle" fill="#ff10f0" font-size="20" font-weight="700" font-family="JetBrains Mono, monospace">$BTC</text>
+        <text x="400" y="411" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="JetBrains Mono, monospace" id="focus-price">—</text>
+        <text x="400" y="428" text-anchor="middle" font-size="10" font-weight="700" font-family="JetBrains Mono, monospace" id="focus-verdict" fill="#7a8aff">— / 12</text>
+      </g>
+    </svg>
+  </div>
+</main>
+
+<footer>
+  <span class="tip">SOURCE · COINBASE EXCHANGE · 7D ROLLING PEARSON</span>
+  <span class="tip">© 2026 PENGUINS LLC · <a href="https://hacktrader.com">HACKTRADER ↗</a></span>
+</footer>
+
+<script>
+(function () {
+  if (localStorage.getItem("el5_access_granted") !== "1") {
+    window.location.replace("/");
+    return;
+  }
+
+  const FOCUS = "BTC";
+  const PEERS = ["ETH","SOL","BCH","XRP","ADA","AVAX","DOGE","DOT","LINK","ATOM","NEAR","LTC"];
+  const COINBASE = "https://api.exchange.coinbase.com/products";
+  const GRANULARITY = 3600;
+  const HOURS = 168;
+  const POLL_MS = 5 * 60 * 1000;
+
+  const CX = 400, CY = 400;
+  const RING_INNER = 90;
+  const RING_OUTER = 320;
+  const PEER_HEX_R = 26;
+
+  const ANGLE_OFFSET = -Math.PI / 2;
+  const peerAngle = (i) => ANGLE_OFFSET + (i / PEERS.length) * Math.PI * 2;
+
+  const dot = document.getElementById("dot");
+  const dotText = document.getElementById("dot-text");
+  const loading = document.getElementById("loading");
+  const linesG = document.getElementById("lines");
+  const peersG = document.getElementById("peers");
+  const clockEl = document.getElementById("clock");
+  const focusPriceEl = document.getElementById("focus-price");
+  const focusVerdictEl = document.getElementById("focus-verdict");
+
+  function setStatus(state, text) {
+    dot.className = "status-dot " + (state || "");
+    dotText.textContent = text;
+  }
+
+  function fmtPrice(p) {
+    if (!Number.isFinite(p)) return "—";
+    if (p >= 1000) return "$" + p.toLocaleString(undefined, {maximumFractionDigits: 0});
+    if (p >= 1)    return "$" + p.toFixed(2);
+    return "$" + p.toFixed(4);
+  }
+
+  function hexPath(cx, cy, r) {
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 3;
+      pts.push((cx + r * Math.cos(a)).toFixed(1) + "," + (cy + r * Math.sin(a)).toFixed(1));
+    }
+    return pts.join(" ");
+  }
+
+  function tickClock() {
+    const now = new Date();
+    const hh = String(now.getUTCHours()).padStart(2, "0");
+    const mm = String(now.getUTCMinutes()).padStart(2, "0");
+    const ss = String(now.getUTCSeconds()).padStart(2, "0");
+    clockEl.textContent = `${hh}:${mm}:${ss} UTC`;
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+
+  async function fetchCandles(symbol) {
+    const product = `${symbol}-USD`;
+    const end = new Date();
+    const start = new Date(end.getTime() - HOURS * GRANULARITY * 1000);
+    const url = `${COINBASE}/${product}/candles?granularity=${GRANULARITY}` +
+                `&start=${encodeURIComponent(start.toISOString())}` +
+                `&end=${encodeURIComponent(end.toISOString())}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`${product} ${r.status}`);
+    const rows = await r.json();
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    return rows
+      .map(row => ({ t: row[0], close: row[4] }))
+      .filter(r => Number.isFinite(r.close))
+      .sort((a, b) => a.t - b.t);
+  }
+
+  function logReturns(series) {
+    const out = [];
+    for (let i = 1; i < series.length; i++) {
+      const prev = series[i-1].close, curr = series[i].close;
+      if (prev > 0 && curr > 0) out.push({ t: series[i].t, r: Math.log(curr / prev) });
+    }
+    return out;
+  }
+
+  function pearson(xs, ys) {
+    const n = Math.min(xs.length, ys.length);
+    if (n < 10) return null;
+    let sx = 0, sy = 0;
+    for (let i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; }
+    const mx = sx / n, my = sy / n;
+    let num = 0, dx = 0, dy = 0;
+    for (let i = 0; i < n; i++) {
+      const ex = xs[i] - mx, ey = ys[i] - my;
+      num += ex * ey; dx += ex * ex; dy += ey * ey;
+    }
+    if (dx === 0 || dy === 0) return null;
+    return num / Math.sqrt(dx * dy);
+  }
+
+  function alignReturns(focusRets, peerRets) {
+    const focusMap = new Map(focusRets.map(p => [p.t, p.r]));
+    const xs = [], ys = [];
+    for (const p of peerRets) {
+      if (focusMap.has(p.t)) { xs.push(focusMap.get(p.t)); ys.push(p.r); }
+    }
+    return [xs, ys];
+  }
+
+  function changePct24h(series) {
+    if (series.length < 24) return null;
+    const last = series[series.length - 1].close;
+    const prev = series[series.length - 24].close;
+    if (!(prev > 0)) return null;
+    return (last - prev) / prev;
+  }
+
+  function corrToRadius(c) {
+    if (!Number.isFinite(c)) return RING_OUTER;
+    const mag = Math.min(1, Math.max(0, Math.abs(c)));
+    return RING_INNER + (RING_OUTER - RING_INNER) * (1 - mag);
+  }
+
+  function renderPeer(i, symbol, corr, bias24h) {
+    const angle = peerAngle(i);
+    const r = corrToRadius(corr);
+    const x = CX + r * Math.cos(angle);
+    const y = CY + r * Math.sin(angle);
+    const isUp = bias24h !== null && bias24h >= 0;
+    const isInverse = corr !== null && corr < 0;
+    const color = isUp ? "#39ff14" : "#ff5500";
+    const glowId = isUp ? "ug" : "dg";
+
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", CX); line.setAttribute("y1", CY);
+    line.setAttribute("x2", x.toFixed(1)); line.setAttribute("y2", y.toFixed(1));
+    line.setAttribute("stroke", color);
+    line.setAttribute("stroke-width", "0.5");
+    line.setAttribute("stroke-dasharray", "3 3");
+    line.setAttribute("opacity", "0.45");
+    linesG.appendChild(line);
+
+    const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
+    glow.setAttribute("r", PEER_HEX_R + 8);
+    glow.setAttribute("fill", `url(#${glowId})`);
+    peersG.appendChild(glow);
+
+    const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    hex.setAttribute("points", hexPath(x, y, PEER_HEX_R));
+    hex.setAttribute("fill", "#0a0a14");
+    hex.setAttribute("stroke", color);
+    hex.setAttribute("stroke-width", "1.4");
+    if (isInverse) hex.setAttribute("stroke-dasharray", "3 2");
+    peersG.appendChild(hex);
+
+    const ticker = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    ticker.setAttribute("x", x.toFixed(1));
+    ticker.setAttribute("y", (y + 3).toFixed(1));
+    ticker.setAttribute("text-anchor", "middle");
+    ticker.setAttribute("fill", color);
+    ticker.setAttribute("font-size", "10");
+    ticker.setAttribute("font-weight", "700");
+    ticker.setAttribute("font-family", "JetBrains Mono, monospace");
+    ticker.textContent = "$" + symbol;
+    peersG.appendChild(ticker);
+
+    const cornerOff = PEER_HEX_R + 12;
+    const lx = x + cornerOff * Math.cos(angle);
+    const ly = y + cornerOff * Math.sin(angle);
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", lx.toFixed(1));
+    label.setAttribute("y", ly.toFixed(1));
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("fill", "#7a8aff");
+    label.setAttribute("font-size", "9");
+    label.setAttribute("font-family", "JetBrains Mono, monospace");
+    label.textContent = corr === null ? "—" : corr.toFixed(2);
+    peersG.appendChild(label);
+  }
+
+  async function loadAndRender() {
+    setStatus("fetching", "FETCHING...");
+    try {
+      const seriesByToken = {};
+      for (const sym of [FOCUS, ...PEERS]) {
+        try {
+          const candles = await fetchCandles(sym);
+          if (candles && candles.length >= 24) seriesByToken[sym] = candles;
+        } catch (e) {
+          console.warn(`fetch failed for ${sym}:`, e.message);
+        }
+        await new Promise(r => setTimeout(r, 120));
+      }
+
+      const focusSeries = seriesByToken[FOCUS];
+      if (!focusSeries) throw new Error("No BTC data");
+
+      const focusRets = logReturns(focusSeries);
+      const focusLast = focusSeries[focusSeries.length - 1].close;
+      const focusChg = changePct24h(focusSeries);
+
+      focusPriceEl.textContent = fmtPrice(focusLast);
+
+      linesG.innerHTML = "";
+      peersG.innerHTML = "";
+
+      let confirmCount = 0;
+      let totalCount = 0;
+      const focusUp = focusChg !== null && focusChg >= 0;
+
+      PEERS.forEach((sym, i) => {
+        const series = seriesByToken[sym];
+        let corr = null, bias = null;
+        if (series) {
+          const peerRets = logReturns(series);
+          const [xs, ys] = alignReturns(focusRets, peerRets);
+          corr = pearson(xs, ys);
+          bias = changePct24h(series);
+          if (corr !== null && bias !== null) {
+            totalCount++;
+            const peerUp = bias >= 0;
+            const inverse = corr < 0;
+            const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
+            if (aligned) confirmCount++;
+          }
+        }
+        renderPeer(i, sym, corr, bias);
+      });
+
+      const arrow = focusUp ? "▲" : "▼";
+      focusVerdictEl.textContent = `${confirmCount}/${totalCount} ${arrow}`;
+      focusVerdictEl.setAttribute("fill", focusUp ? "#39ff14" : "#ff5500");
+
+      loading.classList.add("hidden");
+      const stamp = new Date().toISOString().substring(11, 19);
+      setStatus("", `OK · ${stamp}Z`);
+    } catch (e) {
+      console.error(e);
+      setStatus("error", "ERR · RETRY IN 5M");
+      loading.textContent = "▌ STATIC TOO LOUD · " + e.message;
+    }
+  }
+
+  loadAndRender();
+  setInterval(loadAndRender, POLL_MS);
+})();
+</script>
+</body>
+</html>

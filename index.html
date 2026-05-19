@@ -187,29 +187,45 @@ body.granted #revealed {
   flex-direction: column;
   align-items: center;
   gap: 24px;
-  max-width: 720px;
+  padding: 36px 44px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-body.granted .static { opacity: 0.32; }
+body.granted .static { opacity: 0.30; }
 .granted-headline {
   font-size: 14px;
   letter-spacing: 0.28em;
   color: var(--magenta);
 }
-.granted-body {
-  text-align: center;
+.enter-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  background: transparent;
+  border: 1px solid var(--magenta);
+  color: var(--magenta);
+  font-family: inherit;
   font-size: 13px;
-  line-height: 1.8;
-  color: var(--text);
-  max-width: 520px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s, transform 0.08s;
 }
-.granted-svg {
-  width: 100%;
-  max-width: 640px;
-  height: auto;
+.enter-btn:hover {
+  background: var(--magenta);
+  color: #0a0a14;
+}
+.enter-btn:active { transform: scale(0.97); }
+.granted-sub {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--dim);
 }
 @media (max-width: 480px) {
   .gate-input { width: 200px; }
-  .gate { padding: 20px 24px; min-width: 280px; }
+  .gate, #revealed { padding: 20px 24px; min-width: 280px; }
   header { padding: 14px 16px; }
   footer { padding: 12px 16px; font-size: 9px; }
 }
@@ -235,57 +251,8 @@ body.granted .static { opacity: 0.32; }
 
   <div id="revealed">
     <div class="granted-headline">▌ ACCESS GRANTED</div>
-    <svg class="granted-svg" viewBox="0 0 680 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="el5 radar concept">
-      <defs>
-        <radialGradient id="fg" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0%" stop-color="#ff10f0" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#ff10f0" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="ug" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0%" stop-color="#39ff14" stop-opacity="0.3"/>
-          <stop offset="100%" stop-color="#39ff14" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="dg" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0%" stop-color="#ff5500" stop-opacity="0.3"/>
-          <stop offset="100%" stop-color="#ff5500" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <circle cx="340" cy="270" r="220" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
-      <circle cx="340" cy="270" r="170" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
-      <circle cx="340" cy="270" r="120" fill="none" stroke="#13132a" stroke-width="0.5" stroke-dasharray="1 3"/>
-      <line x1="340" y1="270" x2="340" y2="110" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="450" y2="130" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="510" y2="200" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="530" y2="270" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="500" y2="360" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="440" y2="420" stroke="#ff5500" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="340" y2="440" stroke="#ff5500" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="240" y2="420" stroke="#ff5500" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="180" y2="360" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="150" y2="270" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="170" y2="200" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <line x1="340" y1="270" x2="230" y2="130" stroke="#39ff14" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.45"/>
-      <g><circle cx="340" cy="110" r="28" fill="url(#ug)"/><polygon points="340,92 356,101 356,119 340,128 324,119 324,101" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="340" y="114" text-anchor="middle" fill="#39ff14" font-size="10" font-weight="700" font-family="JetBrains Mono, monospace">$ETH</text></g>
-      <g><circle cx="450" cy="130" r="26" fill="url(#ug)"/><polygon points="450,114 464,122 464,138 450,146 436,138 436,122" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="450" y="134" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$SOL</text></g>
-      <g><circle cx="510" cy="200" r="24" fill="url(#ug)"/><polygon points="510,186 522,193 522,207 510,214 498,207 498,193" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="510" y="204" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$BCH</text></g>
-      <g><circle cx="530" cy="270" r="24" fill="url(#ug)"/><polygon points="530,256 542,263 542,277 530,284 518,277 518,263" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="530" y="274" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$AVAX</text></g>
-      <g><circle cx="500" cy="360" r="22" fill="url(#ug)"/><polygon points="500,348 510,354 510,366 500,372 490,366 490,354" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="500" y="364" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$LINK</text></g>
-      <g><circle cx="440" cy="420" r="22" fill="url(#dg)"/><polygon points="440,408 450,414 450,426 440,432 430,426 430,414" fill="#0a0a14" stroke="#ff5500" stroke-width="1.4"/><text x="440" y="424" text-anchor="middle" fill="#ff5500" font-size="8" font-weight="700" font-family="JetBrains Mono, monospace">$DOGE</text></g>
-      <g><circle cx="340" cy="440" r="22" fill="url(#dg)"/><polygon points="340,428 350,434 350,446 340,452 330,446 330,434" fill="#0a0a14" stroke="#ff5500" stroke-width="1.4"/><text x="340" y="444" text-anchor="middle" fill="#ff5500" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$XRP</text></g>
-      <g><circle cx="240" cy="420" r="22" fill="url(#dg)"/><polygon points="240,408 250,414 250,426 240,432 230,426 230,414" fill="#0a0a14" stroke="#ff5500" stroke-width="1.4" stroke-dasharray="3 2"/><text x="240" y="424" text-anchor="middle" fill="#ff5500" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$ADA</text></g>
-      <g><circle cx="180" cy="360" r="22" fill="url(#ug)"/><polygon points="180,348 190,354 190,366 180,372 170,366 170,354" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="180" y="364" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$LTC</text></g>
-      <g><circle cx="150" cy="270" r="24" fill="url(#ug)"/><polygon points="150,256 162,263 162,277 150,284 138,277 138,263" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="150" y="274" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$DOT</text></g>
-      <g><circle cx="170" cy="200" r="24" fill="url(#ug)"/><polygon points="170,186 182,193 182,207 170,214 158,207 158,193" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="170" y="204" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$ATOM</text></g>
-      <g><circle cx="230" cy="130" r="26" fill="url(#ug)"/><polygon points="230,114 244,122 244,138 230,146 216,138 216,122" fill="#0a0a14" stroke="#39ff14" stroke-width="1.4"/><text x="230" y="134" text-anchor="middle" fill="#39ff14" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">$NEAR</text></g>
-      <circle cx="340" cy="270" r="54" fill="url(#fg)"/>
-      <polygon points="340,228 376,249 376,291 340,312 304,291 304,249" fill="#0a0a14" stroke="#ff10f0" stroke-width="1.5"/>
-      <text x="340" y="266" text-anchor="middle" fill="#ff10f0" font-size="18" font-weight="700" font-family="JetBrains Mono, monospace">$BTC</text>
-      <text x="340" y="284" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="JetBrains Mono, monospace">FOCUS</text>
-    </svg>
-    <div class="granted-body">
-      this is the visual direction. the live product will render real-time correlation structure across the major alts, with crypto-native dimensions — session arc, fear-greed ring, stablecoin proximity, volume halos. <br><br>
-      we're tuning the data path. you're on the list — we'll send a note when the gate opens for real.
-    </div>
+    <a class="enter-btn" href="/dashboard.html">ENTER DASHBOARD ↗</a>
+    <div class="granted-sub">LIVE CRYPTO STRUCTURE · BTC FOCUS · 12 ALTS</div>
   </div>
 </main>
 
