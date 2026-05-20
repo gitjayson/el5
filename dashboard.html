@@ -128,6 +128,40 @@ main {
   max-height: calc(100vh - 130px);
   position: relative;
 }
+#peer-tooltip {
+  position: fixed;
+  z-index: 50;
+  background: #0d0c18;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+  pointer-events: none;
+  display: none;
+  max-width: 260px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #8a8a9a;
+}
+#peer-tooltip .tt-sym {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "JetBrains Mono", monospace;
+  margin-bottom: 4px;
+}
+#peer-tooltip .tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+#peer-tooltip .tt-label { color: var(--muted); }
+#peer-tooltip .tt-val { font-family: "JetBrains Mono", monospace; font-weight: 600; }
+#peer-tooltip .tt-desc {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #1a1a2e;
+  color: #6a6a7a;
+  font-size: 10px;
+}
 #radar { width: 100%; height: 100%; display: block; }
 .loading-overlay {
   position: absolute;
@@ -501,6 +535,89 @@ footer a:hover { color: var(--muted); }
 #snapshot-btn.flash { border-color: var(--cyan); color: var(--cyan); transition: none; }
 #snapshot-btn.done { border-color: var(--green); color: var(--green); }
 
+#info-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#info-btn:hover { color: var(--text); border-color: var(--muted); }
+
+.info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 6, 14, 0.85);
+  backdrop-filter: blur(4px);
+}
+.info-modal.hidden { display: none; }
+.info-modal-inner {
+  background: #0d0c18;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  max-width: 480px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.info-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+.info-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.info-close:hover { color: var(--text); }
+.info-modal-body { padding: 16px; }
+.info-section { margin-bottom: 16px; }
+.info-section:last-child { margin-bottom: 0; }
+.info-title {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 8px;
+  border-bottom: 1px solid #1a1a2e;
+  padding-bottom: 4px;
+}
+.info-row {
+  font-size: 11px;
+  color: #8a8a9a;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.info-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-right: 6px;
+}
+
 /* Replay mode indicator */
 .replay-mode-badge {
   position: absolute;
@@ -587,11 +704,52 @@ footer a:hover { color: var(--muted); }
     <button id="view-toggle" title="Toggle diversification view">▌ DIVERSIFY</button>
     <button id="snapshot-btn" title="Export radar as PNG">▌ SNAP</button>
     <button id="alert-history-btn" title="Alert history">▌ ALERTS<span id="alert-badge" class="hidden">0</span></button>
+    <button id="info-btn" title="Legend">?</button>
     <span class="status-refresh"><span id="dot" class="status-dot"></span><span id="dot-text">IDLE</span></span>
   </div>
 </header>
 
+<div id="peer-tooltip"></div>
 <div id="alert-container"></div>
+
+<div id="info-modal" class="info-modal hidden">
+  <div class="info-modal-inner">
+    <div class="info-modal-header">
+      <span>▌ LEGEND</span>
+      <button class="info-close" id="info-close">✕</button>
+    </div>
+    <div class="info-modal-body">
+      <div class="info-section">
+        <div class="info-title">REGIMES</div>
+        <div class="info-row"><span class="info-tag" style="color:#39ff14">HERD</span> High correlation, strong consensus — the market moves as a pack</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff5500">PANIC</span> High correlation + BTC dropping &gt;3% — correlated selloff</div>
+        <div class="info-row"><span class="info-tag" style="color:#00f0ff">ROTATION</span> Low correlation — money rotating between assets independently</div>
+        <div class="info-row"><span class="info-tag" style="color:#7a8aff">DRIFT</span> Moderate correlation, no strong consensus — market is indecisive</div>
+      </div>
+      <div class="info-section">
+        <div class="info-title">RADAR</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Position</span> Distance from center = correlation strength (closer = higher |corr|)</div>
+        <div class="info-row"><span class="info-tag" style="color:#39ff14">Green hex</span> Alt is up in the last 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff5500">Red hex</span> Alt is down in the last 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Hex size</span> Volatility relative to BTC — bigger = more volatile</div>
+        <div class="info-row"><span class="info-tag" style="color:#7a8aff">Dashed border</span> Inverse correlation (alt moves opposite to BTC)</div>
+      </div>
+      <div class="info-section">
+        <div class="info-title">FOCUS HEX</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White</span> BTC is up 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff10f0">Magenta</span> BTC is down 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">83% ▲</span> Percentage of alts confirming BTC's direction</div>
+      </div>
+      <div class="info-section">
+        <div class="info-title">CHANNEL</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Current band</span> EMA(20) ± 2× ATR(14) — expected trading range</div>
+        <div class="info-row"><span class="info-tag" style="color:#39ff14">Upper band</span> Breakout zone above current channel</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff5500">Lower band</span> Breakout zone below current channel</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White dot</span> Current BTC price — floats into breakout band on breakout</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="alert-history-panel">
   <div class="history-header">
@@ -646,7 +804,7 @@ footer a:hover { color: var(--muted); }
         <text id="focus-ticker" x="400" y="388" text-anchor="middle" fill="#ff10f0" font-size="20" font-weight="700" font-family="JetBrains Mono, monospace">$BTC</text>
         <text x="400" y="406" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="JetBrains Mono, monospace" id="focus-price">—</text>
         <text x="400" y="421" text-anchor="middle" font-size="13" font-weight="700" font-family="JetBrains Mono, monospace" id="focus-verdict" fill="#7a8aff">—</text>
-        <text x="400" y="444" text-anchor="middle" font-size="9" font-weight="500" font-family="JetBrains Mono, monospace" letter-spacing="0.16em" id="regime-label" fill="#3a3a55">—</text>
+        <text x="400" y="446" text-anchor="middle" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" letter-spacing="0.16em" id="regime-label" fill="#3a3a55">—</text>
       </g>
     </svg>
   </div>
@@ -1046,6 +1204,51 @@ footer a:hover { color: var(--muted); }
     focusTickerEl.setAttribute("fill", color);
   }
 
+  // Focus hex tooltip
+  const focusG = document.getElementById("focus");
+  let lastFocusTooltipData = null;
+
+  focusG.style.cursor = "pointer";
+  focusG.addEventListener("mouseenter", (e) => {
+    const d = lastFocusTooltipData;
+    if (!d) return;
+    const peerTooltip = document.getElementById("peer-tooltip");
+    const chgStr = d.focusChg !== null ? (d.focusChg >= 0 ? "+" : "") + (d.focusChg * 100).toFixed(2) + "%" : "—";
+    const chgColor = d.focusChg !== null ? (d.focusChg >= 0 ? "#e8e8ff" : "#ff10f0") : "#8a8a9a";
+    const pct = d.totalCount > 0 ? Math.round((d.confirmCount / d.totalCount) * 100) : 0;
+
+    // Describe what's happening
+    const parts = [`BTC is ${d.focusChg >= 0 ? "up" : "down"} ${Math.abs((d.focusChg || 0) * 100).toFixed(1)}% over 24h.`];
+    parts.push(`${d.confirmCount} of ${d.totalCount} alts confirm the move (${pct}%).`);
+    if (pct >= 80) parts.push("Strong consensus — the market is moving together.");
+    else if (pct >= 60) parts.push("Moderate consensus across alts.");
+    else parts.push("Weak consensus — alts are diverging from BTC.");
+
+    peerTooltip.innerHTML = `
+      <div class="tt-sym" style="color:${chgColor}">$BTC</div>
+      <div class="tt-row"><span class="tt-label">Price</span><span class="tt-val">${fmtPrice(d.focusLast)}</span></div>
+      <div class="tt-row"><span class="tt-label">24h change</span><span class="tt-val" style="color:${chgColor}">${chgStr}</span></div>
+      <div class="tt-row"><span class="tt-label">Confirmation</span><span class="tt-val">${d.confirmCount}/${d.totalCount} (${pct}%)</span></div>
+      <div class="tt-desc">${parts.join(" ")}</div>
+    `;
+    peerTooltip.style.display = "block";
+    positionTooltip(e);
+  });
+  focusG.addEventListener("mousemove", (e) => {
+    const tt = document.getElementById("peer-tooltip");
+    const pad = 12;
+    let left = e.clientX + pad;
+    let top = e.clientY + pad;
+    const rect = tt.getBoundingClientRect();
+    if (left + rect.width > window.innerWidth - pad) left = e.clientX - rect.width - pad;
+    if (top + rect.height > window.innerHeight - pad) top = e.clientY - rect.height - pad;
+    tt.style.left = left + "px";
+    tt.style.top = top + "px";
+  });
+  focusG.addEventListener("mouseleave", () => {
+    document.getElementById("peer-tooltip").style.display = "none";
+  });
+
   function setStatus(state, text) {
     dot.className = "status-dot " + (state || "");
     dotText.textContent = text;
@@ -1141,6 +1344,65 @@ footer a:hover { color: var(--muted); }
     return RING_INNER + (RING_OUTER - RING_INNER) * (1 - mag);
   }
 
+  // ── Tooltip ──
+  const peerTooltip = document.getElementById("peer-tooltip");
+
+  function describePeer(symbol, corr, bias24h, volRatio) {
+    const parts = [];
+    if (corr !== null) {
+      const strength = Math.abs(corr) >= 0.8 ? "strongly" : Math.abs(corr) >= 0.5 ? "moderately" : "weakly";
+      const dir = corr < 0 ? "inversely" : "positively";
+      parts.push(`${symbol} is ${strength} ${dir} correlated with BTC (${corr.toFixed(2)}).`);
+    } else {
+      parts.push(`${symbol} has no correlation data yet.`);
+    }
+    if (bias24h !== null) {
+      const pct = (bias24h * 100).toFixed(1);
+      parts.push(`${bias24h >= 0 ? "Up" : "Down"} ${Math.abs(pct)}% in the last 24h.`);
+    }
+    if (volRatio !== null) {
+      const vr = volRatio.toFixed(2);
+      if (volRatio > 1.2) parts.push(`${vr}× more volatile than BTC.`);
+      else if (volRatio < 0.8) parts.push(`${vr}× less volatile than BTC.`);
+      else parts.push(`Similar volatility to BTC (${vr}×).`);
+    }
+    return parts.join(" ");
+  }
+
+  function showTooltip(e, symbol, corr, bias24h, volRatio) {
+    const corrStr = corr !== null ? corr.toFixed(3) : "—";
+    const biasStr = bias24h !== null ? (bias24h >= 0 ? "+" : "") + (bias24h * 100).toFixed(2) + "%" : "—";
+    const volStr = volRatio !== null ? volRatio.toFixed(2) + "×" : "—";
+    const biasColor = bias24h !== null ? (bias24h >= 0 ? "#39ff14" : "#ff5500") : "#8a8a9a";
+
+    peerTooltip.innerHTML = `
+      <div class="tt-sym" style="color:${biasColor}">$${symbol}</div>
+      <div class="tt-row"><span class="tt-label">Correlation</span><span class="tt-val">${corrStr}</span></div>
+      <div class="tt-row"><span class="tt-label">24h change</span><span class="tt-val" style="color:${biasColor}">${biasStr}</span></div>
+      <div class="tt-row"><span class="tt-label">Vol ratio</span><span class="tt-val">${volStr}</span></div>
+      <div class="tt-desc">${describePeer(symbol, corr, bias24h, volRatio)}</div>
+    `;
+    peerTooltip.style.display = "block";
+    positionTooltip(e);
+  }
+
+  function positionTooltip(e) {
+    const tt = peerTooltip;
+    const pad = 12;
+    let left = e.clientX + pad;
+    let top = e.clientY + pad;
+    // Keep on screen
+    const rect = tt.getBoundingClientRect();
+    if (left + rect.width > window.innerWidth - pad) left = e.clientX - rect.width - pad;
+    if (top + rect.height > window.innerHeight - pad) top = e.clientY - rect.height - pad;
+    tt.style.left = left + "px";
+    tt.style.top = top + "px";
+  }
+
+  function hideTooltip() {
+    peerTooltip.style.display = "none";
+  }
+
   function renderPeer(i, symbol, corr, bias24h, volRatio) {
     const angle = peerAngle(i);
     const r = corrToRadius(corr);
@@ -1152,7 +1414,6 @@ footer a:hover { color: var(--muted); }
     const glowId = isUp ? "ug" : "dg";
 
     // Vol-adjusted scaling: volRatio = peer_vol / btc_vol
-    // >1 means more volatile than BTC → bigger hex; <1 → smaller
     const vScale = Math.min(1.8, Math.max(0.6, volRatio || 1));
     const hexR = PEER_HEX_R * vScale;
     const strokeW = 1.4 * Math.min(1.5, Math.max(0.7, vScale));
@@ -1166,11 +1427,15 @@ footer a:hover { color: var(--muted); }
     line.setAttribute("opacity", "0.45");
     linesG.appendChild(line);
 
+    // Hoverable group for glow + hex + labels
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.style.cursor = "pointer";
+
     const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
     glow.setAttribute("r", hexR + 8);
     glow.setAttribute("fill", `url(#${glowId})`);
-    peersG.appendChild(glow);
+    g.appendChild(glow);
 
     const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     hex.setAttribute("points", hexPath(x, y, hexR));
@@ -1178,7 +1443,7 @@ footer a:hover { color: var(--muted); }
     hex.setAttribute("stroke", color);
     hex.setAttribute("stroke-width", strokeW.toFixed(1));
     if (isInverse) hex.setAttribute("stroke-dasharray", "3 2");
-    peersG.appendChild(hex);
+    g.appendChild(hex);
 
     const ticker = document.createElementNS("http://www.w3.org/2000/svg", "text");
     ticker.setAttribute("x", x.toFixed(1));
@@ -1189,7 +1454,7 @@ footer a:hover { color: var(--muted); }
     ticker.setAttribute("font-weight", "700");
     ticker.setAttribute("font-family", "JetBrains Mono, monospace");
     ticker.textContent = "$" + symbol;
-    peersG.appendChild(ticker);
+    g.appendChild(ticker);
 
     const cornerOff = hexR + 12;
     const lx = x + cornerOff * Math.cos(angle);
@@ -1202,7 +1467,13 @@ footer a:hover { color: var(--muted); }
     label.setAttribute("font-size", "9");
     label.setAttribute("font-family", "JetBrains Mono, monospace");
     label.textContent = corr === null ? "—" : corr.toFixed(2);
-    peersG.appendChild(label);
+    g.appendChild(label);
+
+    g.addEventListener("mouseenter", (e) => showTooltip(e, symbol, corr, bias24h, volRatio));
+    g.addEventListener("mousemove", positionTooltip);
+    g.addEventListener("mouseleave", hideTooltip);
+
+    peersG.appendChild(g);
   }
 
   /* ═══════════════════════════════════════════════════
@@ -1279,7 +1550,7 @@ footer a:hover { color: var(--muted); }
   }
 
   function renderDiversifyPeer(i, peerData) {
-    const { symbol, corr, divScore, weight, volRatio } = peerData;
+    const { symbol, corr, divScore, weight, volRatio, bias24h } = peerData;
     const angle = peerAngle(i);
     const r = divScoreToRadius(divScore);
     const x = CX + r * Math.cos(angle);
@@ -1305,18 +1576,22 @@ footer a:hover { color: var(--muted); }
     line.setAttribute("opacity", "0.3");
     linesG.appendChild(line);
 
+    // Hoverable group
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.style.cursor = "pointer";
+
     const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
     glow.setAttribute("r", hexR + 8);
     glow.setAttribute("fill", `url(#${glowId})`);
-    peersG.appendChild(glow);
+    g.appendChild(glow);
 
     const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     hex.setAttribute("points", hexPath(x, y, hexR));
     hex.setAttribute("fill", "#0a0a14");
     hex.setAttribute("stroke", color);
     hex.setAttribute("stroke-width", strokeW.toFixed(1));
-    peersG.appendChild(hex);
+    g.appendChild(hex);
 
     const ticker = document.createElementNS("http://www.w3.org/2000/svg", "text");
     ticker.setAttribute("x", x.toFixed(1));
@@ -1327,7 +1602,7 @@ footer a:hover { color: var(--muted); }
     ticker.setAttribute("font-weight", "700");
     ticker.setAttribute("font-family", "JetBrains Mono, monospace");
     ticker.textContent = "$" + symbol;
-    peersG.appendChild(ticker);
+    g.appendChild(ticker);
 
     const wtText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     wtText.setAttribute("x", x.toFixed(1));
@@ -1339,7 +1614,7 @@ footer a:hover { color: var(--muted); }
     wtText.setAttribute("font-family", "JetBrains Mono, monospace");
     wtText.setAttribute("opacity", "0.8");
     wtText.textContent = weight !== null ? (weight * 100).toFixed(1) + "%" : "—";
-    peersG.appendChild(wtText);
+    g.appendChild(wtText);
 
     const cornerOff = hexR + 12;
     const lx = x + cornerOff * Math.cos(angle);
@@ -1352,7 +1627,13 @@ footer a:hover { color: var(--muted); }
     label.setAttribute("font-size", "9");
     label.setAttribute("font-family", "JetBrains Mono, monospace");
     label.textContent = divScore !== null ? "d:" + divScore.toFixed(2) : "—";
-    peersG.appendChild(label);
+    g.appendChild(label);
+
+    g.addEventListener("mouseenter", (e) => showTooltip(e, symbol, corr, bias24h, volRatio));
+    g.addEventListener("mousemove", positionTooltip);
+    g.addEventListener("mouseleave", hideTooltip);
+
+    peersG.appendChild(g);
   }
 
   function updateRingLabels(mode) {
@@ -1389,6 +1670,7 @@ footer a:hover { color: var(--muted); }
       focusVerdictEl.textContent = `${pct}% ${arrow}`;
       focusVerdictEl.setAttribute("fill", data.focusUp ? "#e8e8ff" : "#ff10f0");
       updateFocusColor(data.focusUp);
+      lastFocusTooltipData = data;
       const regime = classifyRegime(data.peerResults.map(p => ({ corr: p.corr, bias24h: p.bias24h })), data.focusChg);
       updateRegimeLabel(regime);
     }
@@ -1824,6 +2106,17 @@ footer a:hover { color: var(--muted); }
   }
 
   snapshotBtn.addEventListener("click", exportRadarPNG);
+
+  // Info modal
+  const infoBtn = document.getElementById("info-btn");
+  const infoModal = document.getElementById("info-modal");
+  const infoClose = document.getElementById("info-close");
+
+  infoBtn.addEventListener("click", () => infoModal.classList.remove("hidden"));
+  infoClose.addEventListener("click", () => infoModal.classList.add("hidden"));
+  infoModal.addEventListener("click", (e) => {
+    if (e.target === infoModal) infoModal.classList.add("hidden");
+  });
 
   /* ═══════════════════════════════════════════════════
      END SNAPSHOT
