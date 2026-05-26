@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>el5.io Support</title>
+<meta name="theme-color" content="#07070d">
+<style>
+:root {
+  --bg: #07070d;
+  --panel: rgba(10, 10, 20, 0.72);
+  --border: rgba(122, 138, 255, 0.22);
+  --text: #e8e8ff;
+  --muted: #7a8aff;
+  --dim: #676784;
+  --magenta: #ff10f0;
+  --cyan: #00f0ff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.65;
+  padding: calc(32px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+}
+main {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: 24px;
+}
+h1 {
+  margin: 0 0 6px;
+  color: var(--magenta);
+  font-size: 18px;
+  letter-spacing: 0.16em;
+}
+h2 {
+  margin: 24px 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+p, li { color: var(--text); font-size: 13px; }
+.note { color: var(--dim); font-size: 12px; margin-bottom: 20px; }
+a { color: var(--cyan); }
+</style>
+</head>
+<body>
+<main>
+  <h1>EL5.IO SUPPORT</h1>
+  <p class="note">Read-only crypto market structure visualization.</p>
+
+  <h2>CONTACT</h2>
+  <p>Email support: <a href="mailto:jghawley@gmail.com">jghawley@gmail.com</a></p>
+
+  <h2>WHAT TO INCLUDE</h2>
+  <ul>
+    <li>Your iPhone model and iOS version.</li>
+    <li>The app version shown in TestFlight or the App Store.</li>
+    <li>A short description of what happened.</li>
+    <li>A screenshot if the issue is visual.</li>
+  </ul>
+
+  <h2>NOTES</h2>
+  <p>el5.io does not execute trades, custody crypto assets, manage wallets, or provide personalized investment advice. Live data depends on public Coinbase Exchange market-data availability.</p>
+</main>
+</body>
+</html>

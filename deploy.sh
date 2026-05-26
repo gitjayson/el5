@@ -38,6 +38,7 @@ EXCLUDES=(
   --exclude='requirements.txt'
   --exclude='deploy.sh'
   --exclude='README.md'
+  --exclude='ios/'
   --include='data/'
   --include='data/replay.json'
   --exclude='data/**'
