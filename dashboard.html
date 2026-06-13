@@ -681,7 +681,51 @@ footer a:hover { color: var(--muted); }
   font-family: "JetBrains Mono", monospace;
 }
 
+#focus-switcher {
+  position: fixed;
+  top: 46px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  z-index: 9;
+  background: rgba(10, 10, 20, 0.55);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+}
+.fsw-btn {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.fsw-btn:hover { color: var(--text); }
+.fsw-btn.active {
+  color: var(--magenta);
+  border-color: rgba(255, 16, 240, 0.5);
+  background: rgba(255, 16, 240, 0.08);
+}
+.fsw-btn.fsw-all.active {
+  color: var(--cyan);
+  border-color: rgba(0, 240, 255, 0.5);
+  background: rgba(0, 240, 255, 0.08);
+}
+.fsw-btn:disabled { opacity: 0.3; cursor: default; }
+.fsw-sep { color: var(--dim); font-size: 10px; }
+
 @media (max-width: 600px) {
+  #focus-switcher { top: 44px; gap: 3px; padding: 4px 6px; }
+  .fsw-btn { font-size: 10px; padding: 3px 7px; }
   header { padding: 10px 14px; }
   footer { padding: 10px 14px; font-size: 9px; }
   .status { gap: 10px; }
@@ -709,6 +753,15 @@ footer a:hover { color: var(--muted); }
   </div>
 </header>
 
+<div id="focus-switcher" role="tablist" aria-label="Focus coin">
+  <button class="fsw-btn" data-coin="BTC">BTC</button>
+  <button class="fsw-btn" data-coin="ETH">ETH</button>
+  <button class="fsw-btn" data-coin="SOL">SOL</button>
+  <button class="fsw-btn" data-coin="XRP">XRP</button>
+  <span class="fsw-sep">▌</span>
+  <button class="fsw-btn fsw-all" data-coin="ALL">ALL</button>
+</div>
+
 <div id="peer-tooltip"></div>
 <div id="alert-container"></div>
 
@@ -722,7 +775,7 @@ footer a:hover { color: var(--muted); }
       <div class="info-section">
         <div class="info-title">REGIMES</div>
         <div class="info-row"><span class="info-tag" style="color:#39ff14">HERD</span> High correlation, strong consensus — the market moves as a pack</div>
-        <div class="info-row"><span class="info-tag" style="color:#ff5500">PANIC</span> High correlation + BTC dropping &gt;3% — correlated selloff</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff5500">PANIC</span> High correlation + focus coin dropping &gt;3% — correlated selloff</div>
         <div class="info-row"><span class="info-tag" style="color:#00f0ff">ROTATION</span> Low correlation — money rotating between assets independently</div>
         <div class="info-row"><span class="info-tag" style="color:#7a8aff">DRIFT</span> Moderate correlation, no strong consensus — market is indecisive</div>
       </div>
@@ -731,21 +784,22 @@ footer a:hover { color: var(--muted); }
         <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Position</span> Distance from center = correlation strength (closer = higher |corr|)</div>
         <div class="info-row"><span class="info-tag" style="color:#39ff14">Green hex</span> Alt is up in the last 24h</div>
         <div class="info-row"><span class="info-tag" style="color:#ff5500">Red hex</span> Alt is down in the last 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Hex size</span> Volatility relative to BTC — bigger = more volatile</div>
-        <div class="info-row"><span class="info-tag" style="color:#7a8aff">Dashed border</span> Inverse correlation (alt moves opposite to BTC)</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Hex size</span> Volatility relative to the focus coin — bigger = more volatile</div>
+        <div class="info-row"><span class="info-tag" style="color:#7a8aff">Dashed border</span> Inverse correlation (peer moves opposite to the focus coin)</div>
       </div>
       <div class="info-section">
         <div class="info-title">FOCUS HEX</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White</span> BTC is up 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#ff10f0">Magenta</span> BTC is down 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">83% ▲</span> Percentage of alts confirming BTC's direction</div>
+        <div class="info-row"><span class="info-tag" style="color:#39ff14">Switcher</span> Center on BTC / ETH / SOL / XRP — or ALL for all four side by side</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White</span> Focus coin is up 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff10f0">Magenta</span> Focus coin is down 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">83% ▲</span> Percentage of peers confirming the focus coin's direction</div>
       </div>
       <div class="info-section">
         <div class="info-title">CHANNEL</div>
         <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Current band</span> EMA(20) ± 2× ATR(14) — expected trading range</div>
         <div class="info-row"><span class="info-tag" style="color:#39ff14">Upper band</span> Breakout zone above current channel</div>
         <div class="info-row"><span class="info-tag" style="color:#ff5500">Lower band</span> Breakout zone below current channel</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White dot</span> Current BTC price — floats into breakout band on breakout</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White dot</span> Current focus-coin price — floats into breakout band on breakout</div>
       </div>
     </div>
   </div>
@@ -806,10 +860,11 @@ footer a:hover { color: var(--muted); }
         <text x="400" y="421" text-anchor="middle" font-size="13" font-weight="700" font-family="JetBrains Mono, monospace" id="focus-verdict" fill="#7a8aff">—</text>
         <text x="400" y="446" text-anchor="middle" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" letter-spacing="0.16em" id="regime-label" fill="#3a3a55">—</text>
       </g>
+      <g id="overview"></g>
     </svg>
   </div>
   <div id="channel-section">
-    <div class="channel-header">▌ BTC CHANNEL</div>
+    <div class="channel-header" id="channel-header">▌ BTC CHANNEL</div>
     <div id="channel-container"></div>
   </div>
 </main>
@@ -843,8 +898,23 @@ footer a:hover { color: var(--muted); }
     return;
   }
 
-  const FOCUS = "BTC";
-  const PEERS = ["ETH","SOL","BCH","XRP","ADA","AVAX","DOGE","DOT","LINK","ATOM","NEAR","LTC"];
+  // Full tradable universe. The focus coin is whichever one is "in the
+  // middle"; everything else becomes a peer on the ring.
+  const UNIVERSE = ["BTC","ETH","SOL","BCH","XRP","ADA","AVAX","DOGE","DOT","LINK","ATOM","NEAR","LTC"];
+  // Coins offered in the focus switcher (the four majors).
+  const SWITCHABLE = ["BTC","ETH","SOL","XRP"];
+
+  let FOCUS = localStorage.getItem("el5_focus") || "BTC";
+  if (!UNIVERSE.includes(FOCUS)) FOCUS = "BTC";
+  let PEERS = UNIVERSE.filter(s => s !== FOCUS);
+
+  function applyFocus(sym) {
+    if (!UNIVERSE.includes(sym)) return;
+    FOCUS = sym;
+    PEERS = UNIVERSE.filter(s => s !== sym);
+    localStorage.setItem("el5_focus", sym);
+  }
+
   const COINBASE = "https://api.exchange.coinbase.com/products";
   const GRANULARITY = 3600;
   const HOURS = 168;
@@ -863,8 +933,11 @@ footer a:hover { color: var(--muted); }
   const LS_ALERT_LOG = "el5_alert_log";
 
   // ── Correlation history: { symbol: [{ t, r }] } ──
+  // Namespaced per focus coin: a peer's correlation to BTC means something
+  // different than its correlation to SOL, so each focus keeps its own log.
+  function corrHistoryKey() { return LS_CORR_HISTORY + ":" + FOCUS; }
   function loadCorrHistory() {
-    try { return JSON.parse(localStorage.getItem(LS_CORR_HISTORY)) || {}; }
+    try { return JSON.parse(localStorage.getItem(corrHistoryKey())) || {}; }
     catch { return {}; }
   }
   function saveCorrHistory(h) {
@@ -873,7 +946,7 @@ footer a:hover { color: var(--muted); }
     for (const sym of Object.keys(h)) {
       trimmed[sym] = h[sym].slice(-200);
     }
-    localStorage.setItem(LS_CORR_HISTORY, JSON.stringify(trimmed));
+    localStorage.setItem(corrHistoryKey(), JSON.stringify(trimmed));
   }
   function pushCorr(history, symbol, corrValue) {
     if (!Number.isFinite(corrValue)) return;
@@ -1218,14 +1291,14 @@ footer a:hover { color: var(--muted); }
     const pct = d.totalCount > 0 ? Math.round((d.confirmCount / d.totalCount) * 100) : 0;
 
     // Describe what's happening
-    const parts = [`BTC is ${d.focusChg >= 0 ? "up" : "down"} ${Math.abs((d.focusChg || 0) * 100).toFixed(1)}% over 24h.`];
-    parts.push(`${d.confirmCount} of ${d.totalCount} alts confirm the move (${pct}%).`);
+    const parts = [`${FOCUS} is ${d.focusChg >= 0 ? "up" : "down"} ${Math.abs((d.focusChg || 0) * 100).toFixed(1)}% over 24h.`];
+    parts.push(`${d.confirmCount} of ${d.totalCount} peers confirm the move (${pct}%).`);
     if (pct >= 80) parts.push("Strong consensus — the market is moving together.");
-    else if (pct >= 60) parts.push("Moderate consensus across alts.");
-    else parts.push("Weak consensus — alts are diverging from BTC.");
+    else if (pct >= 60) parts.push("Moderate consensus across peers.");
+    else parts.push(`Weak consensus — peers are diverging from ${FOCUS}.`);
 
     peerTooltip.innerHTML = `
-      <div class="tt-sym" style="color:${chgColor}">$BTC</div>
+      <div class="tt-sym" style="color:${chgColor}">$${FOCUS}</div>
       <div class="tt-row"><span class="tt-label">Price</span><span class="tt-val">${fmtPrice(d.focusLast)}</span></div>
       <div class="tt-row"><span class="tt-label">24h change</span><span class="tt-val" style="color:${chgColor}">${chgStr}</span></div>
       <div class="tt-row"><span class="tt-label">Confirmation</span><span class="tt-val">${d.confirmCount}/${d.totalCount} (${pct}%)</span></div>
@@ -1352,7 +1425,7 @@ footer a:hover { color: var(--muted); }
     if (corr !== null) {
       const strength = Math.abs(corr) >= 0.8 ? "strongly" : Math.abs(corr) >= 0.5 ? "moderately" : "weakly";
       const dir = corr < 0 ? "inversely" : "positively";
-      parts.push(`${symbol} is ${strength} ${dir} correlated with BTC (${corr.toFixed(2)}).`);
+      parts.push(`${symbol} is ${strength} ${dir} correlated with ${FOCUS} (${corr.toFixed(2)}).`);
     } else {
       parts.push(`${symbol} has no correlation data yet.`);
     }
@@ -1362,9 +1435,9 @@ footer a:hover { color: var(--muted); }
     }
     if (volRatio !== null) {
       const vr = volRatio.toFixed(2);
-      if (volRatio > 1.2) parts.push(`${vr}× more volatile than BTC.`);
-      else if (volRatio < 0.8) parts.push(`${vr}× less volatile than BTC.`);
-      else parts.push(`Similar volatility to BTC (${vr}×).`);
+      if (volRatio > 1.2) parts.push(`${vr}× more volatile than ${FOCUS}.`);
+      else if (volRatio < 0.8) parts.push(`${vr}× less volatile than ${FOCUS}.`);
+      else parts.push(`Similar volatility to ${FOCUS} (${vr}×).`);
     }
     return parts.join(" ");
   }
@@ -1487,7 +1560,7 @@ footer a:hover { color: var(--muted); }
        weight = inverse-vol × divScore, normalized to 100%
      ═══════════════════════════════════════════════════ */
 
-  let viewMode = "radar"; // "radar" | "diversify"
+  let viewMode = "radar"; // "radar" | "diversify" | "overview"
   let lastComputedData = null; // cached for re-renders on toggle
 
   const viewToggle = document.getElementById("view-toggle");
@@ -1644,10 +1717,36 @@ footer a:hover { color: var(--muted); }
     });
   }
 
+  const overviewG = document.getElementById("overview");
+  const channelSection = document.getElementById("channel-section");
+  const channelHeaderEl = document.getElementById("channel-header");
+
+  // Show/hide the radar groups vs. the consolidated overview group.
+  function applyViewVisibility() {
+    const overview = viewMode === "overview";
+    overviewG.style.display = overview ? "" : "none";
+    focusG.style.display = overview ? "none" : "";
+    ringsG.style.display = overview ? "none" : "";
+    linesG.style.display = overview ? "none" : "";
+    peersG.style.display = overview ? "none" : "";
+    channelSection.style.display = overview ? "none" : "";
+  }
+
   function renderView(data) {
+    applyViewVisibility();
+
+    if (viewMode === "overview") {
+      renderOverview();
+      return;
+    }
+
     if (!data) return;
     linesG.innerHTML = "";
     peersG.innerHTML = "";
+
+    // Keep the focus hex label + channel header in sync with the active coin.
+    focusTickerEl.textContent = "$" + FOCUS;
+    channelHeaderEl.textContent = "▌ " + FOCUS + " CHANNEL";
 
     if (viewMode === "diversify") {
       updateRingLabels("diversify");
@@ -1677,10 +1776,106 @@ footer a:hover { color: var(--muted); }
 
   }
 
+  /* ═══════════════════════════════════════════════════
+     CONSOLIDATED OVERVIEW — the four majors, hexes only
+     ─────────────────────────────────────────────────
+     Just the focus hex for each switchable coin (no peer
+     ring). Each hex is colored by 24h direction and shows
+     price + peer-confirmation %. Click to drill into that
+     coin's full radar.
+     ═══════════════════════════════════════════════════ */
+
+  const SVGNS = "http://www.w3.org/2000/svg";
+
+  function renderOverview() {
+    overviewG.innerHTML = "";
+    // 2×2 grid of hex centers inside the 800×800 viewBox.
+    const positions = [[262, 296], [538, 296], [262, 540], [538, 540]];
+    const hexR = 78;
+
+    SWITCHABLE.forEach((sym, idx) => {
+      const [cx, cy] = positions[idx];
+      const d = lastSeries ? computeFocusData(lastSeries, sym, false) : null;
+
+      const hasData = d && d.focusChg !== null;
+      const up = hasData ? d.focusUp : null;
+      const color = up === null ? "#ff10f0" : (up ? "#e8e8ff" : "#ff10f0");
+      const glowId = up === null ? "fg" : (up ? "fgu" : "fgd");
+
+      const g = document.createElementNS(SVGNS, "g");
+      g.style.cursor = "pointer";
+
+      const glow = document.createElementNS(SVGNS, "circle");
+      glow.setAttribute("cx", cx); glow.setAttribute("cy", cy);
+      glow.setAttribute("r", hexR + 18);
+      glow.setAttribute("fill", `url(#${glowId})`);
+      g.appendChild(glow);
+
+      const hex = document.createElementNS(SVGNS, "polygon");
+      hex.setAttribute("points", hexPath(cx, cy, hexR));
+      hex.setAttribute("fill", "#0a0a14");
+      hex.setAttribute("stroke", color);
+      hex.setAttribute("stroke-width", "1.8");
+      g.appendChild(hex);
+
+      const ticker = document.createElementNS(SVGNS, "text");
+      ticker.setAttribute("x", cx); ticker.setAttribute("y", cy - 14);
+      ticker.setAttribute("text-anchor", "middle");
+      ticker.setAttribute("fill", color);
+      ticker.setAttribute("font-size", "26");
+      ticker.setAttribute("font-weight", "700");
+      ticker.setAttribute("font-family", "JetBrains Mono, monospace");
+      ticker.textContent = "$" + sym;
+      g.appendChild(ticker);
+
+      const price = document.createElementNS(SVGNS, "text");
+      price.setAttribute("x", cx); price.setAttribute("y", cy + 8);
+      price.setAttribute("text-anchor", "middle");
+      price.setAttribute("fill", "#e8e8ff");
+      price.setAttribute("font-size", "13");
+      price.setAttribute("font-family", "JetBrains Mono, monospace");
+      price.textContent = hasData ? fmtPrice(d.focusLast) : "—";
+      g.appendChild(price);
+
+      const verdict = document.createElementNS(SVGNS, "text");
+      verdict.setAttribute("x", cx); verdict.setAttribute("y", cy + 30);
+      verdict.setAttribute("text-anchor", "middle");
+      verdict.setAttribute("font-size", "15");
+      verdict.setAttribute("font-weight", "700");
+      verdict.setAttribute("font-family", "JetBrains Mono, monospace");
+      if (hasData) {
+        const chg = (d.focusChg * 100);
+        const pct = d.totalCount > 0 ? Math.round((d.confirmCount / d.totalCount) * 100) : 0;
+        const arrow = up ? "▲" : "▼";
+        verdict.setAttribute("fill", up ? "#39ff14" : "#ff5500");
+        verdict.textContent = `${chg >= 0 ? "+" : ""}${chg.toFixed(1)}% ${arrow}`;
+
+        const cons = document.createElementNS(SVGNS, "text");
+        cons.setAttribute("x", cx); cons.setAttribute("y", cy + 52);
+        cons.setAttribute("text-anchor", "middle");
+        cons.setAttribute("fill", "#7a8aff");
+        cons.setAttribute("font-size", "11");
+        cons.setAttribute("font-family", "JetBrains Mono, monospace");
+        cons.textContent = `${pct}% peers align`;
+        g.appendChild(cons);
+      } else {
+        verdict.setAttribute("fill", "#3a3a55");
+        verdict.textContent = "—";
+      }
+      g.appendChild(verdict);
+
+      g.addEventListener("click", () => selectFocus(sym));
+      overviewG.appendChild(g);
+    });
+  }
+
   viewToggle.addEventListener("click", () => {
-    viewMode = viewMode === "radar" ? "diversify" : "radar";
+    if (replayMode) return;
+    // From overview, DIVERSIFY drops into the active coin's diversify view.
+    viewMode = viewMode === "diversify" ? "radar" : "diversify";
     viewToggle.classList.toggle("active", viewMode === "diversify");
     viewToggle.textContent = viewMode === "diversify" ? "▌ RADAR" : "▌ DIVERSIFY";
+    syncSwitcher();
     renderView(lastComputedData);
   });
 
@@ -1704,6 +1899,7 @@ footer a:hover { color: var(--muted); }
   let replaySpeed = 1;         // frames per tick
   let replayIntervalMs = 250;  // base tick rate
   let livePollTimer = null;    // saved live poll interval ID
+  let replayPrevFocus = null;  // focus coin to restore when replay exits
 
   const replayBar = document.getElementById("replay-bar");
   const replayBadge = document.getElementById("replay-badge");
@@ -1915,15 +2111,26 @@ footer a:hover { color: var(--muted); }
     setStatus("fetching", "LOADING REPLAY...");
     replayEnterBtn.textContent = "▌ LOADING...";
 
+    // Replay frames are BTC-relative — pin focus to BTC for the duration
+    // (incl. the loadReplayData fallback fetch) without clobbering the user's
+    // saved selection, and leave the overview.
+    replayPrevFocus = FOCUS;
+    if (viewMode === "overview") viewMode = "radar";
+    FOCUS = "BTC";
+    PEERS = UNIVERSE.filter(s => s !== "BTC");
+
     replayData = await loadReplayData();
     if (!replayData || replayData.frames.length === 0) {
       setStatus("error", "NO REPLAY DATA");
       replayEnterBtn.textContent = "▌ REPLAY";
+      // Restore focus — replay didn't actually start.
+      applyFocus(replayPrevFocus); replayPrevFocus = null;
       return;
     }
 
     replayMode = true;
     replayIndex = 0;
+    syncSwitcher();
 
     // Pause live polling
     // (The live poll is set up via setInterval in the main flow — we'll track it)
@@ -1951,6 +2158,10 @@ footer a:hover { color: var(--muted); }
     replayBadge.classList.remove("active");
     replayEnterBtn.style.display = "";
     replayEnterBtn.textContent = "▌ REPLAY";
+
+    // Restore the focus coin the user was on before replay.
+    if (replayPrevFocus) { applyFocus(replayPrevFocus); replayPrevFocus = null; }
+    syncSwitcher();
 
     // Trigger a live refresh
     loadAndRender();
@@ -2270,13 +2481,124 @@ footer a:hover { color: var(--muted); }
      END CHANNEL
      ═══════════════════════════════════════════════════ */
 
+  // Last full universe series map — lets focus switches + the overview
+  // recompute from cached data instantly without waiting on a refetch.
+  let lastSeries = null;
+
+  // Compute the radar dataset for a given focus coin against the rest of the
+  // universe. runAlerts is only true on live polls of the *active* focus, so
+  // switching context or rendering the overview never fires duplicate alerts.
+  function computeFocusData(seriesByToken, focusSym, runAlerts) {
+    const focusSeries = seriesByToken[focusSym];
+    if (!focusSeries) return null;
+
+    const focusRets = logReturns(focusSeries);
+    const focusLast = focusSeries[focusSeries.length - 1].close;
+    const focusChg = changePct24h(focusSeries);
+    const focusVol = computeVolatility(focusSeries);
+    const focusUp = focusChg !== null && focusChg >= 0;
+    const peers = UNIVERSE.filter(s => s !== focusSym);
+
+    const corrHistory = runAlerts ? loadCorrHistory() : null;
+    let confirmCount = 0, totalCount = 0;
+    const peerResults = [];
+
+    peers.forEach((sym) => {
+      const series = seriesByToken[sym];
+      let corr = null, bias = null, vol = null, volRatio = null;
+      if (series) {
+        const peerRets = logReturns(series);
+        const [xs, ys] = alignReturns(focusRets, peerRets);
+        corr = pearson(xs, ys);
+        bias = changePct24h(series);
+        vol = computeVolatility(series);
+        if (vol !== null && focusVol !== null && focusVol > 0) {
+          volRatio = vol / focusVol;
+        }
+        if (corr !== null && bias !== null) {
+          totalCount++;
+          const peerUp = bias >= 0;
+          const inverse = corr < 0;
+          const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
+          if (aligned) confirmCount++;
+        }
+        // ── Alert engine: record + check (active focus, live poll only) ──
+        if (runAlerts && corr !== null) {
+          checkDecorrelation(sym, corr, corrHistory);
+          pushCorr(corrHistory, sym, corr);
+        }
+      }
+      peerResults.push({ symbol: sym, corr, bias24h: bias, vol, volRatio });
+    });
+
+    if (runAlerts) saveCorrHistory(corrHistory);
+
+    return { peerResults, focusLast, focusChg, focusUp, confirmCount, totalCount, focusSeries };
+  }
+
+  // Recompute the active focus from cached series and re-render.
+  function recomputeAndRender(runAlerts) {
+    if (!lastSeries) return;
+    const data = computeFocusData(lastSeries, FOCUS, runAlerts);
+    if (!data) { setStatus("error", `NO ${FOCUS} DATA`); return; }
+    lastComputedData = data;
+    renderView(data);
+    if (viewMode !== "overview") {
+      renderChannel(computeChannel(data.focusSeries));
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     FOCUS SWITCHER
+     ═══════════════════════════════════════════════════ */
+
+  const switcher = document.getElementById("focus-switcher");
+  const switcherBtns = switcher.querySelectorAll(".fsw-btn");
+
+  function syncSwitcher() {
+    switcherBtns.forEach(btn => {
+      const coin = btn.dataset.coin;
+      const active = coin === "ALL" ? viewMode === "overview"
+                                    : (viewMode !== "overview" && coin === FOCUS);
+      btn.classList.toggle("active", active);
+      btn.disabled = replayMode;
+    });
+  }
+
+  // Pick a focus coin (from switcher or overview hex) and show its radar.
+  function selectFocus(sym) {
+    if (replayMode) return;
+    applyFocus(sym);
+    if (viewMode === "overview") viewMode = "radar";
+    syncSwitcher();
+    if (lastSeries) recomputeAndRender(false);
+    else loadAndRender();
+  }
+
+  function showOverview() {
+    if (replayMode) return;
+    viewMode = "overview";
+    viewToggle.classList.remove("active");
+    viewToggle.textContent = "▌ DIVERSIFY";
+    syncSwitcher();
+    renderView(lastComputedData);
+  }
+
+  switcherBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const coin = btn.dataset.coin;
+      if (coin === "ALL") showOverview();
+      else selectFocus(coin);
+    });
+  });
+
   async function loadAndRender() {
     // Skip live updates while in replay mode
     if (replayMode) return;
     setStatus("fetching", "FETCHING...");
     try {
       const seriesByToken = {};
-      for (const sym of [FOCUS, ...PEERS]) {
+      for (const sym of UNIVERSE) {
         try {
           const candles = await fetchCandles(sym);
           if (candles && candles.length >= 24) seriesByToken[sym] = candles;
@@ -2285,76 +2607,11 @@ footer a:hover { color: var(--muted); }
         }
         await new Promise(r => setTimeout(r, 120));
       }
+      lastSeries = seriesByToken;
 
-      const focusSeries = seriesByToken[FOCUS];
-      if (!focusSeries) throw new Error("No BTC data");
+      if (!seriesByToken[FOCUS]) throw new Error(`No ${FOCUS} data`);
 
-      const focusRets = logReturns(focusSeries);
-      const focusLast = focusSeries[focusSeries.length - 1].close;
-      const focusChg = changePct24h(focusSeries);
-      const focusVol = computeVolatility(focusSeries);
-
-      linesG.innerHTML = "";
-      peersG.innerHTML = "";
-
-      let confirmCount = 0;
-      let totalCount = 0;
-      const focusUp = focusChg !== null && focusChg >= 0;
-
-      // Load correlation history for alert engine
-      const corrHistory = loadCorrHistory();
-
-      // Build per-alt result objects
-      const peerResults = [];
-
-      PEERS.forEach((sym, i) => {
-        const series = seriesByToken[sym];
-        let corr = null, bias = null, vol = null, volRatio = null;
-        if (series) {
-          const peerRets = logReturns(series);
-          const [xs, ys] = alignReturns(focusRets, peerRets);
-          corr = pearson(xs, ys);
-          bias = changePct24h(series);
-          vol = computeVolatility(series);
-          if (vol !== null && focusVol !== null && focusVol > 0) {
-            volRatio = vol / focusVol;
-          }
-          if (corr !== null && bias !== null) {
-            totalCount++;
-            const peerUp = bias >= 0;
-            const inverse = corr < 0;
-            const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
-            if (aligned) confirmCount++;
-          }
-
-          // ── Alert engine: record + check ──
-          if (corr !== null) {
-            checkDecorrelation(sym, corr, corrHistory);
-            pushCorr(corrHistory, sym, corr);
-          }
-        }
-        peerResults.push({ symbol: sym, corr, bias24h: bias, vol, volRatio });
-      });
-
-      // Persist updated correlation history
-      saveCorrHistory(corrHistory);
-
-      // Cache computed data for view toggling
-      lastComputedData = {
-        peerResults,
-        focusLast,
-        focusChg,
-        focusUp,
-        confirmCount,
-        totalCount,
-      };
-
-      // Render current view
-      renderView(lastComputedData);
-
-      // Render BTC price channel
-      const channelData = computeChannel(focusSeries);
-      renderChannel(channelData);
+      recomputeAndRender(true);
 
       loading.classList.add("hidden");
       const stamp = new Date().toISOString().substring(11, 19);
@@ -2366,6 +2623,9 @@ footer a:hover { color: var(--muted); }
     }
   }
 
+  syncSwitcher();
+  focusTickerEl.textContent = "$" + FOCUS;
+  channelHeaderEl.textContent = "▌ " + FOCUS + " CHANNEL";
   loadAndRender();
   setInterval(loadAndRender, POLL_MS);
 })();
