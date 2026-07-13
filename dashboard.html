@@ -2213,6 +2213,8 @@ footer a:hover { color: var(--muted); }
     focusPriceEl.setAttribute("font-size", compact ? "21" : "11");
     focusVerdictEl.setAttribute("font-size", compact ? "23" : "13");
     regimeLabel.setAttribute("font-size", compact ? "18" : "12");
+    focusVerdictEl.style.fontSize = `${compact ? 23 : 13}px`;
+    regimeLabel.style.fontSize = `${compact ? 18 : 12}px`;
     focusTickerEl.setAttribute("y", compact ? "382" : "388");
     focusPriceEl.setAttribute("y", compact ? "414" : "406");
     focusVerdictEl.setAttribute("y", compact ? "440" : "421");
@@ -2284,11 +2286,13 @@ footer a:hover { color: var(--muted); }
       const scored = computeDiversificationScores(data.peerResults);
       scored.forEach((p, i) => renderDiversifyPeer(i, p));
 
-      focusPriceEl.textContent = "LOW |CORR|";
-      focusVerdictEl.textContent = "SCORE ↑";
+      focusPriceEl.textContent = fmtPrice(data.focusLast);
+      focusVerdictEl.textContent = "LOW |CORR|";
+      focusVerdictEl.style.fontSize = `${compactViewport() ? 17 : 10}px`;
       focusVerdictEl.setAttribute("fill", "#00f0ff");
       updateFocusColor(null);
-      regimeLabel.textContent = "DIVERSIFICATION";
+      regimeLabel.textContent = "DIVERSIFY ↑";
+      regimeLabel.style.fontSize = `${compactViewport() ? 16 : 10}px`;
       regimeLabel.setAttribute("fill", "#696b86");
     } else {
       updateRingLabels("radar");
