@@ -19,7 +19,7 @@ The product is a current-state market-structure instrument. Replay and portfolio
 ## Primary interface
 
 1. ALL overview with live prices, 24-hour moves, regime, and alignment.
-2. Focus radar with correlation, direction, volatility-scaled peers, and detail sheets.
+2. Focus radar with correlation, direction, and volatility-scaled peers; selecting any peer promotes it to focus.
 3. Plain-language STRUCTURE panel with current deltas, coverage, and as-of time.
 4. DIVERSIFY mode using the neutral score `1 - |correlation|`.
 5. In-app two-sigma decorrelation alerts based on completed hourly observations.

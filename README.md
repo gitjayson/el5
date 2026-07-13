@@ -7,7 +7,7 @@ The production website is [el5.io](https://el5.io). The access code is `STATIC`.
 ## Product
 
 - **ALL overview** shows BTC, ETH, SOL, and XRP together with live quotes, 24-hour change, regime, and alignment.
-- **Focused radar** positions 12 peers by absolute correlation to the selected focus asset.
+- **Focused radar** positions 12 peers by absolute correlation; selecting any peer promotes it to the center and recalculates the instrument around that asset.
 - **Structure brief** states the important market deltas plainly: regime, tightening or loosening, average correlation, alignment, coverage, and strongest/weakest coupling.
 - **Diversify view** reverses the radar and shows the neutral score `1 - |correlation|`; it does not recommend holdings or allocations.
 - **In-app alerts** detect two-standard-deviation moves in completed-hour correlation history, with a 30-minute per-pair cooldown.

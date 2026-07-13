@@ -1165,13 +1165,13 @@ footer a:hover { color: var(--muted); }
   }
 
   const UNIVERSE = ["BTC","ETH","SOL","BCH","XRP","ADA","AVAX","DOGE","DOT","LINK","ATOM","NEAR","LTC"];
-  const SWITCHABLE = ["BTC","ETH","SOL","XRP"];
+  const QUICK_FOCUS = ["BTC","ETH","SOL","XRP"];
   let FOCUS = localStorage.getItem("el5_focus") || "BTC";
-  if (!SWITCHABLE.includes(FOCUS)) FOCUS = "BTC";
+  if (!UNIVERSE.includes(FOCUS)) FOCUS = "BTC";
   let PEERS = UNIVERSE.filter(symbol => symbol !== FOCUS);
 
   function applyFocus(symbol) {
-    if (!SWITCHABLE.includes(symbol)) return;
+    if (!UNIVERSE.includes(symbol)) return;
     FOCUS = symbol;
     PEERS = UNIVERSE.filter(peer => peer !== symbol);
     try { localStorage.setItem("el5_focus", symbol); } catch {}
@@ -1960,7 +1960,7 @@ footer a:hover { color: var(--muted); }
     g.style.cursor = "pointer";
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
-    g.setAttribute("aria-label", `${symbol} detail relative to ${FOCUS}`);
+    g.setAttribute("aria-label", `Make ${symbol} the focus asset`);
 
     const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     hit.setAttribute("cx", x.toFixed(1)); hit.setAttribute("cy", y.toFixed(1));
@@ -2011,12 +2011,12 @@ footer a:hover { color: var(--muted); }
     g.addEventListener("mouseenter", (e) => showTooltip(e, symbol, corr, bias24h, volRatio));
     g.addEventListener("mousemove", positionTooltip);
     g.addEventListener("mouseleave", hideTooltip);
-    const peer = { symbol, corr, bias24h, volRatio, corrDelta };
-    g.addEventListener("click", () => openAssetDetail(peer));
+    const promote = () => selectFocus(symbol, viewMode);
+    g.addEventListener("click", promote);
     g.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        openAssetDetail(peer);
+        promote();
       }
     });
 
@@ -2116,7 +2116,7 @@ footer a:hover { color: var(--muted); }
     g.style.cursor = "pointer";
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
-    g.setAttribute("aria-label", `${symbol} diversification detail relative to ${FOCUS}`);
+    g.setAttribute("aria-label", `Make ${symbol} the focus asset`);
 
     const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     hit.setAttribute("cx", x.toFixed(1)); hit.setAttribute("cy", y.toFixed(1));
@@ -2178,11 +2178,12 @@ footer a:hover { color: var(--muted); }
     g.addEventListener("mouseenter", (e) => showTooltip(e, symbol, corr, bias24h, volRatio));
     g.addEventListener("mousemove", positionTooltip);
     g.addEventListener("mouseleave", hideTooltip);
-    g.addEventListener("click", () => openAssetDetail({ symbol, corr, corrDelta, bias24h, volRatio }));
+    const promote = () => selectFocus(symbol, viewMode);
+    g.addEventListener("click", promote);
     g.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        openAssetDetail({ symbol, corr, corrDelta, bias24h, volRatio });
+        promote();
       }
     });
 
@@ -2317,7 +2318,7 @@ footer a:hover { color: var(--muted); }
     const positions = [[245, 280], [555, 280], [245, 535], [555, 535]];
     const hexR = compactViewport() ? 94 : 82;
 
-    SWITCHABLE.forEach((symbol, index) => {
+    QUICK_FOCUS.forEach((symbol, index) => {
       const [cx, cy] = positions[index];
       const data = lastSeries ? computeFocusData(lastSeries, symbol, false) : null;
       const hasData = data && Number.isFinite(data.focusChg);
@@ -2383,14 +2384,14 @@ footer a:hover { color: var(--muted); }
     viewToggle.textContent = viewMode === "diversify" ? "RADAR" : "DIVERSIFY";
   }
 
-  function selectFocus(symbol) {
+  function selectFocus(symbol, nextMode = "radar") {
     const candidate = lastSeries ? computeFocusData(lastSeries, symbol, false) : null;
     if (!candidate) {
       showDataNotice("error", `${symbol} DATA IS NOT AVAILABLE · TAP TO RETRY`);
       return;
     }
     applyFocus(symbol);
-    viewMode = "radar";
+    viewMode = nextMode === "diversify" ? "diversify" : "radar";
     try { localStorage.setItem("el5_view", viewMode); } catch {}
     syncSwitcher();
     recomputeAndRender(false);
@@ -3012,10 +3013,20 @@ footer a:hover { color: var(--muted); }
     });
     await Promise.all(workers);
     const quotes = {};
-    const quoteResults = await Promise.allSettled(SWITCHABLE.map(symbol => fetchQuote(symbol, signal)));
-    quoteResults.forEach((result, index) => {
-      if (result.status === "fulfilled" && Number.isFinite(result.value)) quotes[SWITCHABLE[index]] = result.value;
+    let quoteCursor = 0;
+    const quoteWorkers = Array.from({ length: 3 }, async () => {
+      while (quoteCursor < UNIVERSE.length) {
+        const symbol = UNIVERSE[quoteCursor++];
+        try {
+          const quote = await fetchQuote(symbol, signal);
+          if (Number.isFinite(quote)) quotes[symbol] = quote;
+        } catch (error) {
+          if (signal.aborted) throw error;
+          console.warn(`quote fetch failed for ${symbol}:`, error.message);
+        }
+      }
     });
+    await Promise.all(quoteWorkers);
     return { seriesByToken, failures, quotes };
   }
 
