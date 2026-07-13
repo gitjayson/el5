@@ -2,36 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>el5.io · dashboard</title>
 <meta name="theme-color" content="#07070d">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #07070d;
-  --panel: rgba(10, 10, 20, 0.55);
-  --border: rgba(122, 138, 255, 0.16);
+  --panel: rgba(12, 12, 24, 0.84);
+  --panel-solid: #0d0d18;
+  --border: rgba(134, 148, 255, 0.26);
   --text: #e8e8ff;
-  --muted: #7a8aff;
-  --dim: #3a3a55;
+  --muted: #91a0ff;
+  --dim: #8587a3;
   --magenta: #ff10f0;
   --green: #39ff14;
   --orange: #ff5500;
   --cyan: #00f0ff;
   --gold: #ffa500;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+html, body { min-height: 100%; }
 body {
-  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  font-family: var(--sans);
   color: var(--text);
   background: var(--bg);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
 }
 .static {
   position: fixed;
@@ -59,22 +67,36 @@ body {
   z-index: 1;
 }
 header {
-  position: fixed;
+  position: sticky;
   top: 0; left: 0; right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 24px;
+  display: grid;
+  gap: 7px;
+  padding: calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 9px calc(12px + env(safe-area-inset-left));
   z-index: 10;
-  background: linear-gradient(to bottom, rgba(7,7,13,0.92), rgba(7,7,13,0));
-  pointer-events: none;
+  background: rgba(7, 7, 13, 0.94);
+  border-bottom: 1px solid rgba(134, 148, 255, 0.12);
+  backdrop-filter: blur(18px) saturate(130%);
 }
-header > * { pointer-events: auto; }
+.header-top {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.header-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  min-width: 0;
+}
 .wordmark {
   color: var(--magenta);
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
 }
 .wordmark .sep {
   color: var(--dim);
@@ -82,21 +104,31 @@ header > * { pointer-events: auto; }
 }
 .wordmark .panel-name {
   color: var(--muted);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.08em;
 }
 .status {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--muted);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
 }
-.status-clock { color: var(--cyan); }
+.status-clock {
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .status-refresh {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .status-dot {
   width: 6px;
@@ -118,16 +150,17 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: 100vh;
-  padding: 56px 16px 60px;
-  gap: 0;
+  min-height: 0;
+  flex: 1 0 auto;
+  padding: 10px calc(12px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+  gap: 8px;
 }
 #radar-wrap {
-  width: min(820px, 96vw);
+  width: min(820px, 100%);
   aspect-ratio: 1 / 1;
-  max-height: calc(100vh - 130px);
   position: relative;
 }
+#radar-wrap.overview { aspect-ratio: 8 / 5; }
 #peer-tooltip {
   position: fixed;
   z-index: 50;
@@ -145,7 +178,7 @@ main {
 #peer-tooltip .tt-sym {
   font-size: 13px;
   font-weight: 700;
-  font-family: "JetBrains Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   margin-bottom: 4px;
 }
 #peer-tooltip .tt-row {
@@ -154,7 +187,7 @@ main {
   gap: 12px;
 }
 #peer-tooltip .tt-label { color: var(--muted); }
-#peer-tooltip .tt-val { font-family: "JetBrains Mono", monospace; font-weight: 600; }
+#peer-tooltip .tt-val { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 600; }
 #peer-tooltip .tt-desc {
   margin-top: 6px;
   padding-top: 6px;
@@ -162,7 +195,7 @@ main {
   color: #6a6a7a;
   font-size: 10px;
 }
-#radar { width: 100%; height: 100%; display: block; }
+#radar { width: 100%; height: 100%; display: block; overflow: visible; }
 .loading-overlay {
   position: absolute;
   inset: 0;
@@ -177,31 +210,40 @@ main {
 }
 .loading-overlay.hidden { display: none; }
 footer {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
+  position: relative;
   display: flex;
   justify-content: space-between;
-  padding: 12px 24px;
+  gap: 8px 20px;
+  padding: 14px calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.06em;
   color: var(--dim);
-  z-index: 10;
-  background: linear-gradient(to top, rgba(7,7,13,0.92), rgba(7,7,13,0));
-  pointer-events: none;
+  z-index: 5;
+  border-top: 1px solid rgba(134, 148, 255, 0.1);
 }
-footer > * { pointer-events: auto; }
 footer a { color: inherit; text-decoration: none; }
 footer a:hover { color: var(--muted); }
 .ticker-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 700;
-  fill: var(--text);
+}
+.diversify-ticker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 .corr-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   fill: var(--muted);
   font-size: 9px;
   letter-spacing: 0.04em;
+}
+.corr-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  fill: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 .tip {
   font-size: 10px;
@@ -212,7 +254,7 @@ footer a:hover { color: var(--muted); }
 /* ── Alert System ── */
 #alert-container {
   position: fixed;
-  top: 48px;
+  top: calc(48px + env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
@@ -329,7 +371,7 @@ footer a:hover { color: var(--muted); }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 16px 16px;
   border-bottom: 1px solid var(--border);
   letter-spacing: 0.18em;
   font-size: 10px;
@@ -403,124 +445,21 @@ footer a:hover { color: var(--muted); }
 
 /* Diversify mode ring labels */
 .div-ring-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   fill: var(--dim);
   font-size: 8px;
   letter-spacing: 0.06em;
 }
 
-/* Weight badge on diversify peers */
-.weight-badge {
-  font-family: 'JetBrains Mono', monospace;
+/* Diversification score inside peer hexes */
+.score-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
-/* ── Replay Controls ── */
-#replay-bar {
-  display: none;
-  width: min(820px, 96vw);
-  margin: 0 auto;
-  padding: 12px 0 0;
-  z-index: 10;
-  position: relative;
-}
-#replay-bar.active { display: block; }
-
-.replay-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.replay-btn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 14px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.replay-btn:hover { border-color: var(--muted); color: var(--text); }
-.replay-btn.active { border-color: var(--cyan); color: var(--cyan); }
-
-#replay-scrub {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  background: var(--dim);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-#replay-scrub::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--magenta);
-  border: 2px solid var(--bg);
-  box-shadow: 0 0 8px rgba(255,16,240,0.4);
-  cursor: pointer;
-}
-#replay-scrub::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--magenta);
-  border: 2px solid var(--bg);
-  box-shadow: 0 0 8px rgba(255,16,240,0.4);
-  cursor: pointer;
-}
-
-#replay-ts {
-  font-size: 10px;
-  color: var(--cyan);
-  letter-spacing: 0.12em;
-  min-width: 140px;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.replay-speed {
-  display: flex;
-  gap: 4px;
-  margin-left: 4px;
-}
-.speed-btn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--dim);
-  font-family: inherit;
-  font-size: 9px;
-  padding: 2px 6px;
-  cursor: pointer;
-  letter-spacing: 0.06em;
-}
-.speed-btn:hover { color: var(--muted); border-color: var(--muted); }
-.speed-btn.active { color: var(--cyan); border-color: var(--cyan); }
-
-.replay-exit {
-  background: none;
-  border: 1px solid var(--orange);
-  color: var(--orange);
-  font-family: inherit;
-  font-size: 9px;
-  padding: 3px 8px;
-  cursor: pointer;
-  letter-spacing: 0.14em;
-  margin-left: auto;
-}
-.replay-exit:hover { color: var(--text); border-color: var(--text); }
-
-#replay-enter-btn, #snapshot-btn {
+#structure-btn, #snapshot-btn {
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -531,7 +470,11 @@ footer a:hover { color: var(--muted); }
   cursor: pointer;
   pointer-events: auto;
 }
-#replay-enter-btn:hover, #snapshot-btn:hover { color: var(--text); border-color: var(--muted); }
+#structure-btn:hover, #snapshot-btn:hover { color: var(--text); border-color: var(--muted); }
+#structure-btn.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
 #snapshot-btn.flash { border-color: var(--cyan); color: var(--cyan); transition: none; }
 #snapshot-btn.done { border-color: var(--green); color: var(--green); }
 
@@ -611,28 +554,43 @@ footer a:hover { color: var(--muted); }
   line-height: 1.5;
 }
 .info-tag {
-  font-family: "JetBrains Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
   margin-right: 6px;
 }
-
-/* Replay mode indicator */
-.replay-mode-badge {
-  position: absolute;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  color: var(--magenta);
-  opacity: 0.6;
-  z-index: 15;
-  pointer-events: none;
-  display: none;
+.structure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
-.replay-mode-badge.active { display: block; }
+.structure-card {
+  border: 1px solid rgba(122,138,255,0.14);
+  background: rgba(10, 10, 20, 0.62);
+  border-radius: 4px;
+  padding: 10px;
+  min-height: 76px;
+}
+.structure-label {
+  color: var(--dim);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  margin-bottom: 7px;
+}
+.structure-value {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.structure-note {
+  color: #8a8a9a;
+  font-size: 10px;
+  line-height: 1.45;
+  margin-top: 6px;
+}
+.structure-wide { grid-column: 1 / -1; }
 
 /* ── Channel strip ── */
 #channel-section {
@@ -651,18 +609,28 @@ footer a:hover { color: var(--muted); }
   border-radius: 4px;
   min-height: 120px;
 }
-#channel-container svg { display: block; width: 100%; }
+#channel-container svg { display: block; width: 100%; height: auto; }
 .ch-band { rx: 3; ry: 3; }
 .ch-label {
   fill: var(--muted);
   font-size: 9px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   letter-spacing: 0.12em;
+  paint-order: stroke;
+  stroke: #0a0a14;
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 .ch-price {
   fill: var(--text);
   font-size: 9px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+.ch-live {
+  fill: var(--cyan);
+  font-size: 9px;
+  font-family: var(--mono);
+  font-weight: 700;
 }
 .ch-polyline {
   fill: none;
@@ -676,62 +644,337 @@ footer a:hover { color: var(--muted); }
   stroke-width: 2;
 }
 .ch-time {
-  fill: #3a3a55;
+  fill: var(--dim);
   font-size: 8px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--mono);
 }
 
 #focus-switcher {
-  position: fixed;
-  top: 46px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  z-index: 9;
-  background: rgba(10, 10, 20, 0.55);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  min-height: 44px;
+  padding: 3px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  backdrop-filter: blur(6px);
+  border-radius: 7px;
+  background: rgba(15, 15, 29, 0.82);
 }
 .fsw-btn {
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid transparent;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
   border-radius: 5px;
-  padding: 4px 10px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
-.fsw-btn:hover { color: var(--text); }
 .fsw-btn.active {
-  color: var(--magenta);
-  border-color: rgba(255, 16, 240, 0.5);
-  background: rgba(255, 16, 240, 0.08);
+  color: var(--text);
+  background: rgba(145, 160, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(145, 160, 255, 0.3);
 }
 .fsw-btn.fsw-all.active {
   color: var(--cyan);
-  border-color: rgba(0, 240, 255, 0.5);
   background: rgba(0, 240, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.35);
 }
-.fsw-btn:disabled { opacity: 0.3; cursor: default; }
-.fsw-sep { color: var(--dim); font-size: 10px; }
+
+#structure-btn,
+#view-toggle,
+#alert-history-btn,
+#snapshot-btn,
+#info-btn,
+.info-close,
+.history-close,
+.history-clear {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(12, 12, 24, 0.72);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+#structure-btn,
+#view-toggle,
+#alert-history-btn {
+  width: 100%;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+#snapshot-btn,
+#info-btn {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 16px;
+}
+#structure-btn.active,
+#view-toggle.active {
+  color: var(--cyan);
+  border-color: rgba(0, 240, 255, 0.55);
+  background: rgba(0, 240, 255, 0.07);
+}
+#snapshot-btn.flash { border-color: var(--cyan); color: var(--cyan); }
+#snapshot-btn.done { border-color: var(--green); color: var(--green); }
+
+#data-notice {
+  position: relative;
+  z-index: 8;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 165, 0, 0.35);
+  background: rgba(44, 27, 5, 0.96);
+  color: #ffd27a;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-align: center;
+  cursor: pointer;
+}
+#data-notice.partial { color: #ffe4a8; }
+#data-notice.error { color: #ffb090; border-color: rgba(255, 85, 0, 0.45); }
+#data-notice.hidden { display: none; }
+
+#market-brief {
+  width: min(820px, 100%);
+  padding: 12px 2px 13px;
+  border-top: 1px solid rgba(145, 160, 255, 0.13);
+  border-bottom: 1px solid rgba(145, 160, 255, 0.13);
+}
+.brief-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.brief-kicker {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.brief-state {
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+.brief-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.brief-metric {
+  min-width: 0;
+  padding-right: 8px;
+  border-right: 1px solid rgba(145, 160, 255, 0.14);
+}
+.brief-metric:last-child { border-right: 0; padding-right: 0; }
+.brief-label {
+  display: block;
+  color: var(--dim);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.brief-value {
+  display: block;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.brief-narrative {
+  color: #b4b5c8;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+.asset-metric {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(145, 160, 255, 0.12);
+}
+.asset-metric:nth-child(odd) { border-right: 1px solid rgba(145, 160, 255, 0.12); }
+.asset-metric .brief-label { margin-bottom: 5px; }
+.asset-value {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.asset-summary {
+  padding: 14px 10px 2px;
+  color: #b4b5c8;
+  font-size: 14px;
+  line-height: 1.5;
+}
 
 @media (max-width: 600px) {
-  #focus-switcher { top: 44px; gap: 3px; padding: 4px 6px; }
-  .fsw-btn { font-size: 10px; padding: 3px 7px; }
-  header { padding: 10px 14px; }
-  footer { padding: 10px 14px; font-size: 9px; }
-  .status { gap: 10px; }
-  .wordmark { font-size: 11px; }
-  #replay-ts { min-width: 100px; font-size: 9px; }
-  .replay-speed { display: none; }
+  .static { opacity: 0.06; }
+  .scanlines { display: none; }
+  header { gap: 6px; }
+  .header-top { min-height: 38px; }
+  .wordmark { font-size: 13px; }
+  .wordmark .sep { margin: 0 5px; }
+  .wordmark .panel-name { display: none; }
+  .header-meta { gap: 5px; }
+  .status-clock { font-size: 10px; }
+  .status-refresh { font-size: 9px; gap: 4px; }
+  #dot-text { max-width: 70px; overflow: hidden; text-overflow: ellipsis; }
+  main { padding-left: 4px; padding-right: 4px; }
+  #radar-wrap,
+  #channel-section,
+  #market-brief { width: min(480px, calc(100vw - 8px)); }
+  .brief-head { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .brief-state { text-align: left; font-size: 14px; line-height: 1.25; }
+  #channel-section { padding-top: 4px; }
+  .channel-header { font-size: 13px; letter-spacing: 0.06em; }
+  .ticker-label { font-size: 24px; }
+  .diversify-ticker { font-size: 18px; }
+  .corr-label { font-size: 16px; }
+  .corr-value { font-size: 28px; }
+  .div-ring-label { font-size: 20px; }
+  .score-badge { font-size: 16px; }
+  #focus-ticker { font-size: 38px; }
+  #focus-price { font-size: 21px; }
+  #focus-verdict { font-size: 23px; }
+  #regime-label { font-size: 18px; }
+  .ch-label { font-size: 13px; letter-spacing: 0.04em; }
+  .ch-price { font-size: 13px; }
+  .ch-live { font-size: 10px; }
+  .ch-polyline { stroke-width: 2.2; }
+  .ch-time { font-size: 12px; }
+  .loading-overlay { font-size: 13px; }
+  .alert-banner,
+  #alert-history-panel,
+  .history-header,
+  .history-item-time,
+  .history-item-detail,
+  .history-clear { font-size: 13px; }
+  #alert-history-panel { width: 100vw; }
+  .info-modal { align-items: flex-end; padding-top: env(safe-area-inset-top); }
+  .info-modal-inner {
+    width: 100vw;
+    max-width: none;
+    max-height: calc(100dvh - env(safe-area-inset-top) - 10px);
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .info-modal-header {
+    position: sticky;
+    top: 0;
+    min-height: 56px;
+    padding: 6px 12px;
+    background: var(--panel-solid);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    z-index: 2;
+  }
+  .info-modal-body {
+    overflow-y: auto;
+    padding: 12px 12px calc(18px + env(safe-area-inset-bottom));
+  }
+  .info-close { width: 44px; min-width: 44px; padding: 0; font-size: 18px; }
+  .info-row { font-size: 14px; color: #b4b5c8; }
+  .info-title { font-size: 11px; letter-spacing: 0.08em; }
+  .info-tag { font-size: 12px; letter-spacing: 0.03em; }
+  .structure-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; }
+  .structure-card {
+    min-height: 92px;
+    padding: 12px 9px;
+    border: 0;
+    border-bottom: 1px solid rgba(145, 160, 255, 0.12);
+    border-radius: 0;
+    background: transparent;
+  }
+  .structure-card:nth-child(odd):not(.structure-wide) { border-right: 1px solid rgba(145, 160, 255, 0.12); }
+  .structure-label { font-size: 10px; letter-spacing: 0.05em; }
+  .structure-value { font-size: 17px; letter-spacing: 0; }
+  .structure-note { font-size: 12px; color: #a7a8ba; }
+  footer {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  footer .tip:first-child { flex: 1 1 100%; }
+  footer .tip:last-child { margin-left: auto; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .scanlines { display: none; }
+  header {
+    position: relative;
+    grid-template-columns: 280px minmax(320px, 1fr);
+    align-items: center;
+    padding-top: calc(5px + env(safe-area-inset-top));
+  }
+  .header-top { grid-column: 1; grid-row: 1; }
+  .wordmark .panel-name, .status-clock { display: none; }
+  .header-meta { gap: 4px; }
+  #focus-switcher { grid-column: 2; grid-row: 1; }
+  .status { grid-column: 1 / -1; grid-row: 2; }
+  main {
+    display: grid;
+    grid-template-columns: 280px minmax(320px, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    justify-content: center;
+    gap: 8px 14px;
+  }
+  #market-brief { grid-column: 2; grid-row: 1; width: 100%; }
+  #radar-wrap { grid-column: 1; grid-row: 1 / span 2; width: min(68vh, 280px); }
+  #channel-section { grid-column: 2; grid-row: 2; width: 100%; }
+  .ch-label, .ch-price { font-size: 18px; }
+  .ch-live { font-size: 16px; }
+  .ch-time { font-size: 15px; }
+  .ticker-label, .corr-value { font-size: 36px; }
+  .diversify-ticker { font-size: 32px; }
+  .score-badge { font-size: 26px; }
+  .div-ring-label { font-size: 24px; }
+  #focus-ticker { font-size: 38px; }
+  #focus-price { font-size: 21px; }
+  #focus-verdict { font-size: 23px; }
+  #regime-label { font-size: 18px; }
+  footer { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 </style>
 </head>
@@ -741,67 +984,93 @@ footer a:hover { color: var(--muted); }
 <div class="scanlines" aria-hidden="true"></div>
 
 <header>
-  <div class="wordmark">EL5.IO<span class="sep">▌</span><span class="panel-name">DASHBOARD</span></div>
+  <div class="header-top">
+    <div class="wordmark">EL5.IO<span class="sep">▌</span><span class="panel-name">MARKET STRUCTURE</span></div>
+    <div class="header-meta">
+      <span class="status-refresh" aria-live="polite"><span id="dot" class="status-dot"></span><span id="dot-text">STARTING</span></span>
+      <span id="clock" class="status-clock">--:-- UTC</span>
+      <button id="snapshot-btn" type="button" title="Share radar snapshot" aria-label="Share radar snapshot">↗</button>
+      <button id="info-btn" type="button" title="Legend" aria-label="Open legend">?</button>
+    </div>
+  </div>
+  <div id="focus-switcher" role="tablist" aria-label="Focus asset">
+    <button class="fsw-btn" type="button" role="tab" data-coin="BTC">BTC</button>
+    <button class="fsw-btn" type="button" role="tab" data-coin="ETH">ETH</button>
+    <button class="fsw-btn" type="button" role="tab" data-coin="SOL">SOL</button>
+    <button class="fsw-btn" type="button" role="tab" data-coin="XRP">XRP</button>
+    <button class="fsw-btn fsw-all" type="button" role="tab" data-coin="ALL">ALL</button>
+  </div>
   <div class="status">
-    <span id="clock" class="status-clock">--:--:-- UTC</span>
-    <button id="replay-enter-btn" title="Historical replay">▌ REPLAY</button>
-    <button id="view-toggle" title="Toggle diversification view">▌ DIVERSIFY</button>
-    <button id="snapshot-btn" title="Export radar as PNG">▌ SNAP</button>
-    <button id="alert-history-btn" title="Alert history">▌ ALERTS<span id="alert-badge" class="hidden">0</span></button>
-    <button id="info-btn" title="Legend">?</button>
-    <span class="status-refresh"><span id="dot" class="status-dot"></span><span id="dot-text">IDLE</span></span>
+    <button id="structure-btn" type="button" title="Market structure facts">STRUCTURE</button>
+    <button id="view-toggle" type="button" title="Toggle diversification view">DIVERSIFY</button>
+    <button id="alert-history-btn" type="button" title="In-app alert history">ALERTS<span id="alert-badge" class="hidden">0</span></button>
   </div>
 </header>
 
-<div id="focus-switcher" role="tablist" aria-label="Focus coin">
-  <button class="fsw-btn" data-coin="BTC">BTC</button>
-  <button class="fsw-btn" data-coin="ETH">ETH</button>
-  <button class="fsw-btn" data-coin="SOL">SOL</button>
-  <button class="fsw-btn" data-coin="XRP">XRP</button>
-  <span class="fsw-sep">▌</span>
-  <button class="fsw-btn fsw-all" data-coin="ALL">ALL</button>
-</div>
+<button id="data-notice" class="hidden" type="button" aria-live="polite"></button>
 
 <div id="peer-tooltip"></div>
 <div id="alert-container"></div>
 
-<div id="info-modal" class="info-modal hidden">
-  <div class="info-modal-inner">
+<div id="structure-modal" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="structure-title">
+  <div class="info-modal-inner" tabindex="-1">
     <div class="info-modal-header">
-      <span>▌ LEGEND</span>
-      <button class="info-close" id="info-close">✕</button>
+      <span id="structure-title">STRUCTURE</span>
+      <button class="info-close" id="structure-close" type="button" aria-label="Close structure">×</button>
+    </div>
+    <div class="info-modal-body" id="structure-body">
+      <div class="history-empty">WAITING FOR MARKET DATA...</div>
+    </div>
+  </div>
+</div>
+
+<div id="info-modal" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="legend-title">
+  <div class="info-modal-inner" tabindex="-1">
+    <div class="info-modal-header">
+      <span id="legend-title">LEGEND</span>
+      <button class="info-close" id="info-close" type="button" aria-label="Close legend">×</button>
     </div>
     <div class="info-modal-body">
       <div class="info-section">
         <div class="info-title">REGIMES</div>
-        <div class="info-row"><span class="info-tag" style="color:#39ff14">HERD</span> High correlation, strong consensus — the market moves as a pack</div>
-        <div class="info-row"><span class="info-tag" style="color:#ff5500">PANIC</span> High correlation + focus coin dropping &gt;3% — correlated selloff</div>
-        <div class="info-row"><span class="info-tag" style="color:#00f0ff">ROTATION</span> Low correlation — money rotating between assets independently</div>
+        <div class="info-row"><span class="info-tag" style="color:#39ff14">HERD</span> High correlation and strong directional agreement</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff5500">PANIC</span> High correlation with broad losses across the market</div>
+        <div class="info-row"><span class="info-tag" style="color:#00f0ff">ROTATION</span> Lower agreement as assets move independently</div>
         <div class="info-row"><span class="info-tag" style="color:#7a8aff">DRIFT</span> Moderate correlation, no strong consensus — market is indecisive</div>
       </div>
       <div class="info-section">
         <div class="info-title">RADAR</div>
         <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Position</span> Distance from center = correlation strength (closer = higher |corr|)</div>
-        <div class="info-row"><span class="info-tag" style="color:#39ff14">Green hex</span> Alt is up in the last 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#ff5500">Red hex</span> Alt is down in the last 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Hex size</span> Volatility relative to the focus coin — bigger = more volatile</div>
-        <div class="info-row"><span class="info-tag" style="color:#7a8aff">Dashed border</span> Inverse correlation (peer moves opposite to the focus coin)</div>
+        <div class="info-row"><span class="info-tag" style="color:#39ff14">Green hex</span> Peer is up in the last 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff5500">Orange hex</span> Peer is down in the last 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Hex size</span> Volatility relative to the focus asset</div>
+        <div class="info-row"><span class="info-tag" style="color:#7a8aff">Dashed border</span> Peer is inversely correlated with the focus asset</div>
       </div>
       <div class="info-section">
         <div class="info-title">FOCUS HEX</div>
-        <div class="info-row"><span class="info-tag" style="color:#39ff14">Switcher</span> Center on BTC / ETH / SOL / XRP — or ALL for all four side by side</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White</span> Focus coin is up 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#ff10f0">Magenta</span> Focus coin is down 24h</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">83% ▲</span> Percentage of peers confirming the focus coin's direction</div>
+        <div class="info-row"><span class="info-tag" style="color:#00f0ff">Switcher</span> Compare BTC, ETH, SOL, XRP, or all four at once</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White</span> Focus asset is up 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#ff10f0">Magenta</span> Focus asset is down 24h</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">83% ▲</span> Share of peers confirming the focus asset's direction</div>
       </div>
       <div class="info-section">
         <div class="info-title">CHANNEL</div>
         <div class="info-row"><span class="info-tag" style="color:#e8e8ff">Current band</span> EMA(20) ± 2× ATR(14) — expected trading range</div>
         <div class="info-row"><span class="info-tag" style="color:#39ff14">Upper band</span> Breakout zone above current channel</div>
         <div class="info-row"><span class="info-tag" style="color:#ff5500">Lower band</span> Breakout zone below current channel</div>
-        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White dot</span> Current focus-coin price — floats into breakout band on breakout</div>
+        <div class="info-row"><span class="info-tag" style="color:#e8e8ff">White dot</span> Current focus price, including channel breakouts</div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="asset-modal" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="asset-title">
+  <div class="info-modal-inner" tabindex="-1">
+    <div class="info-modal-header">
+      <span id="asset-title">ASSET DETAIL</span>
+      <button class="info-close" id="asset-close" type="button" aria-label="Close asset detail">×</button>
+    </div>
+    <div class="info-modal-body" id="asset-body"></div>
   </div>
 </div>
 
@@ -817,8 +1086,20 @@ footer a:hover { color: var(--muted); }
 </div>
 
 <main>
+  <section id="market-brief" aria-live="polite">
+    <div class="brief-head">
+      <span id="brief-kicker" class="brief-kicker">BTC STRUCTURE</span>
+      <span id="brief-state" class="brief-state">LOADING</span>
+    </div>
+    <div class="brief-metrics">
+      <div class="brief-metric"><span class="brief-label">AVG |CORR|</span><span id="brief-corr" class="brief-value">—</span></div>
+      <div class="brief-metric"><span class="brief-label">ALIGNMENT</span><span id="brief-align" class="brief-value">—</span></div>
+      <div class="brief-metric"><span class="brief-label">COVERAGE</span><span id="brief-coverage" class="brief-value">—</span></div>
+    </div>
+    <p id="brief-narrative" class="brief-narrative">Loading the latest completed hourly candles.</p>
+  </section>
   <div id="radar-wrap">
-    <div id="loading" class="loading-overlay">▌ TUNING THE STATIC...</div>
+    <div id="loading" class="loading-overlay">LOADING MARKET STRUCTURE...</div>
     <svg id="radar" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="el5 crypto correlation radar">
       <defs>
         <radialGradient id="fg" cx="0.5" cy="0.5" r="0.5">
@@ -855,36 +1136,19 @@ footer a:hover { color: var(--muted); }
       <g id="focus">
         <circle id="focus-glow" cx="400" cy="400" r="62" fill="url(#fg)"/>
         <polygon id="focus-hex" points="400,344 449,372 449,428 400,456 351,428 351,372" fill="#0a0a14" stroke="#ff10f0" stroke-width="1.6"/>
-        <text id="focus-ticker" x="400" y="388" text-anchor="middle" fill="#ff10f0" font-size="20" font-weight="700" font-family="JetBrains Mono, monospace">$BTC</text>
-        <text x="400" y="406" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="JetBrains Mono, monospace" id="focus-price">—</text>
-        <text x="400" y="421" text-anchor="middle" font-size="13" font-weight="700" font-family="JetBrains Mono, monospace" id="focus-verdict" fill="#7a8aff">—</text>
-        <text x="400" y="446" text-anchor="middle" font-size="12" font-weight="700" font-family="JetBrains Mono, monospace" letter-spacing="0.16em" id="regime-label" fill="#3a3a55">—</text>
+        <text id="focus-ticker" x="400" y="388" text-anchor="middle" fill="#ff10f0" font-size="20" font-weight="700" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace">$BTC</text>
+        <text x="400" y="406" text-anchor="middle" fill="#e8e8ff" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" id="focus-price">—</text>
+        <text x="400" y="421" text-anchor="middle" font-size="13" font-weight="700" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" id="focus-verdict" fill="#7a8aff">—</text>
+        <text x="400" y="446" text-anchor="middle" font-size="12" font-weight="700" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.16em" id="regime-label" fill="#3a3a55">—</text>
       </g>
       <g id="overview"></g>
     </svg>
   </div>
   <div id="channel-section">
-    <div class="channel-header" id="channel-header">▌ BTC CHANNEL</div>
+    <div class="channel-header" id="channel-header">BTC CHANNEL</div>
     <div id="channel-container"></div>
   </div>
 </main>
-
-<div class="replay-mode-badge" id="replay-badge">▌ REPLAY MODE</div>
-
-<div id="replay-bar">
-  <div class="replay-row">
-    <button class="replay-btn" id="replay-play" title="Play / Pause">▶</button>
-    <input type="range" id="replay-scrub" min="0" max="1" step="1" value="0">
-    <div class="replay-speed">
-      <button class="speed-btn active" data-speed="1">1×</button>
-      <button class="speed-btn" data-speed="2">2×</button>
-      <button class="speed-btn" data-speed="4">4×</button>
-      <button class="speed-btn" data-speed="8">8×</button>
-    </div>
-    <span id="replay-ts">—</span>
-    <button class="replay-exit" id="replay-exit">EXIT</button>
-  </div>
-</div>
 
 <footer>
   <span class="tip">SOURCE · COINBASE EXCHANGE · 7D ROLLING PEARSON</span>
@@ -894,64 +1158,81 @@ footer a:hover { color: var(--muted); }
 <script>
 (function () {
   if (localStorage.getItem("el5_access_granted") !== "1") {
-    window.location.replace("/");
+    window.location.replace("index.html");
     return;
   }
 
-  // Full tradable universe. The focus coin is whichever one is "in the
-  // middle"; everything else becomes a peer on the ring.
   const UNIVERSE = ["BTC","ETH","SOL","BCH","XRP","ADA","AVAX","DOGE","DOT","LINK","ATOM","NEAR","LTC"];
-  // Coins offered in the focus switcher (the four majors).
   const SWITCHABLE = ["BTC","ETH","SOL","XRP"];
-
   let FOCUS = localStorage.getItem("el5_focus") || "BTC";
-  if (!UNIVERSE.includes(FOCUS)) FOCUS = "BTC";
-  let PEERS = UNIVERSE.filter(s => s !== FOCUS);
+  if (!SWITCHABLE.includes(FOCUS)) FOCUS = "BTC";
+  let PEERS = UNIVERSE.filter(symbol => symbol !== FOCUS);
 
-  function applyFocus(sym) {
-    if (!UNIVERSE.includes(sym)) return;
-    FOCUS = sym;
-    PEERS = UNIVERSE.filter(s => s !== sym);
-    localStorage.setItem("el5_focus", sym);
+  function applyFocus(symbol) {
+    if (!SWITCHABLE.includes(symbol)) return;
+    FOCUS = symbol;
+    PEERS = UNIVERSE.filter(peer => peer !== symbol);
+    try { localStorage.setItem("el5_focus", symbol); } catch {}
   }
 
   const COINBASE = "https://api.exchange.coinbase.com/products";
   const GRANULARITY = 3600;
   const HOURS = 168;
+  const STRUCTURE_LOOKBACK_HOURS = 24;
+  const FETCH_HOURS = HOURS + STRUCTURE_LOOKBACK_HOURS;
   const POLL_MS = 5 * 60 * 1000;
+  const FETCH_TIMEOUT_MS = 15000;
+  const CACHE_KEY = "el5_market_cache_v2";
+  const CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+  let lastSeries = null;
+  let lastQuotes = {};
+  let lastCacheSavedAt = 0;
+  let lastComputedData = null;
+  let refreshController = null;
+  let refreshInFlight = false;
+  let refreshTimer = null;
 
   /* ═══════════════════════════════════════════════════
      DECORRELATION ALERT ENGINE
      ═══════════════════════════════════════════════════ */
 
   const ALERT_SIGMA = 2;              // standard-deviation threshold
-  const ALERT_MIN_SAMPLES = 6;        // min polls before alerting (30 min at 5m interval)
+  const ALERT_MIN_SAMPLES = 12;       // completed hourly observations before alerting
   const ALERT_COOLDOWN_MS = 30 * 60 * 1000; // 30-min cooldown per alt
   const ALERT_MAX_HISTORY = 100;      // cap localStorage entries
   const ALERT_BANNER_MS = 12000;      // banner auto-dismiss
   const LS_CORR_HISTORY = "el5_corr_history";
   const LS_ALERT_LOG = "el5_alert_log";
+  const LS_ALERT_COOLDOWN = "el5_alert_cooldowns";
 
   // ── Correlation history: { symbol: [{ t, r }] } ──
-  // Namespaced per focus coin: a peer's correlation to BTC means something
-  // different than its correlation to SOL, so each focus keeps its own log.
-  function corrHistoryKey() { return LS_CORR_HISTORY + ":" + FOCUS; }
-  function loadCorrHistory() {
-    try { return JSON.parse(localStorage.getItem(corrHistoryKey())) || {}; }
-    catch { return {}; }
+  function corrHistoryKey(focus = FOCUS) {
+    return `${LS_CORR_HISTORY}:${focus}`;
   }
-  function saveCorrHistory(h) {
+  function loadCorrHistory(focus = FOCUS) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(corrHistoryKey(focus))) || {};
+      if (!stored || typeof stored !== "object" || Array.isArray(stored)) return {};
+      return stored;
+    } catch { return {}; }
+  }
+  function saveCorrHistory(h, focus = FOCUS) {
     // Keep only the most recent 200 entries per symbol to bound storage
     const trimmed = {};
     for (const sym of Object.keys(h)) {
-      trimmed[sym] = h[sym].slice(-200);
+      if (!Array.isArray(h[sym])) continue;
+      trimmed[sym] = h[sym]
+        .filter(entry => entry && Number.isFinite(entry.t) && Number.isFinite(entry.candleT) && Number.isFinite(entry.r))
+        .slice(-200);
     }
-    localStorage.setItem(corrHistoryKey(), JSON.stringify(trimmed));
+    try { localStorage.setItem(corrHistoryKey(focus), JSON.stringify(trimmed)); } catch {}
   }
-  function pushCorr(history, symbol, corrValue) {
+  function pushCorr(history, symbol, corrValue, candleT) {
     if (!Number.isFinite(corrValue)) return;
     if (!history[symbol]) history[symbol] = [];
-    history[symbol].push({ t: Date.now(), r: corrValue });
+    const last = history[symbol][history[symbol].length - 1];
+    if (last && last.candleT === candleT) return;
+    history[symbol].push({ t: Date.now(), candleT, r: corrValue });
   }
 
   // ── Statistics ──
@@ -967,11 +1248,17 @@ footer a:hover { color: var(--muted); }
 
   // ── Alert log (localStorage) ──
   function loadAlertLog() {
-    try { return JSON.parse(localStorage.getItem(LS_ALERT_LOG)) || []; }
+    try {
+      const log = JSON.parse(localStorage.getItem(LS_ALERT_LOG)) || [];
+      if (!Array.isArray(log)) return [];
+      return log.filter(entry => entry && Number.isFinite(entry.t) && typeof entry.symbol === "string" &&
+        Number.isFinite(entry.corr) && Number.isFinite(entry.mean) && Number.isFinite(entry.stddev) &&
+        Number.isFinite(entry.deviation));
+    }
     catch { return []; }
   }
   function saveAlertLog(log) {
-    localStorage.setItem(LS_ALERT_LOG, JSON.stringify(log.slice(-ALERT_MAX_HISTORY)));
+    try { localStorage.setItem(LS_ALERT_LOG, JSON.stringify(log.slice(-ALERT_MAX_HISTORY))); } catch {}
   }
   function logAlert(entry) {
     const log = loadAlertLog();
@@ -980,8 +1267,14 @@ footer a:hover { color: var(--muted); }
     renderHistoryPanel();
   }
 
-  // ── Cooldown tracker (in-memory) ──
-  const lastAlertTime = {};
+  // ── Cooldown tracker ──
+  let lastAlertTime = {};
+  try {
+    const storedCooldowns = JSON.parse(localStorage.getItem(LS_ALERT_COOLDOWN));
+    if (storedCooldowns && typeof storedCooldowns === "object" && !Array.isArray(storedCooldowns)) {
+      lastAlertTime = storedCooldowns;
+    }
+  } catch {}
 
   // ── Audio chime via Web Audio API ──
   // AudioContext must be created/resumed on a user gesture to avoid autoplay blocking.
@@ -1020,14 +1313,14 @@ footer a:hover { color: var(--muted); }
   // ── On-screen alert banners ──
   const alertContainer = document.getElementById("alert-container");
 
-  function showAlertBanner(symbol, currentCorr, mean, deviation, sigma) {
+  function showAlertBanner(focus, symbol, currentCorr, mean, deviation, sigma) {
     const dir = deviation < 0 ? "▼ DROPPED" : "▲ SPIKED";
     const banner = document.createElement("div");
     banner.className = "alert-banner";
     banner.innerHTML =
       `<span class="alert-icon">⚡</span>` +
       `<span class="alert-body">` +
-        `<span class="alert-sym">$${symbol}</span> ${dir} · ` +
+        `<span class="alert-sym">$${symbol} vs $${focus}</span> ${dir} · ` +
         `r = <span class="alert-val">${currentCorr.toFixed(3)}</span> ` +
         `(μ ${mean.toFixed(3)} ± ${sigma.toFixed(3)}, ${Math.abs(deviation / sigma).toFixed(1)}σ)` +
       `</span>` +
@@ -1083,7 +1376,7 @@ footer a:hover { color: var(--muted); }
   function renderHistoryPanel() {
     const log = loadAlertLog();
     if (log.length === 0) {
-      historyList.innerHTML = '<div class="history-empty">NO ALERTS YET<br><br>Alerts fire when an alt\'s correlation<br>deviates &gt;2σ from its trailing mean.</div>';
+      historyList.innerHTML = '<div class="history-empty">NO IN-APP ALERTS YET<br><br>Alerts appear after a peer correlation<br>moves beyond its hourly baseline.</div>';
       return;
     }
     historyList.innerHTML = "";
@@ -1095,7 +1388,7 @@ footer a:hover { color: var(--muted); }
       const dir = a.deviation < 0 ? "▼" : "▲";
       item.innerHTML =
         `<div class="history-item-top">` +
-          `<span class="history-item-sym">${dir} $${a.symbol}</span>` +
+          `<span class="history-item-sym">${dir} $${a.symbol} / $${a.focus || "BTC"}</span>` +
           `<span class="history-item-time">${new Date(a.t).toISOString().substring(0, 19).replace("T", " ")}Z</span>` +
         `</div>` +
         `<div class="history-item-detail">` +
@@ -1120,13 +1413,16 @@ footer a:hover { color: var(--muted); }
     if (absDeviation > ALERT_SIGMA * stats.stddev) {
       // Check cooldown
       const now = Date.now();
-      if (lastAlertTime[symbol] && (now - lastAlertTime[symbol]) < ALERT_COOLDOWN_MS) return;
-      lastAlertTime[symbol] = now;
+      const cooldownKey = `${FOCUS}:${symbol}`;
+      if (lastAlertTime[cooldownKey] && (now - lastAlertTime[cooldownKey]) < ALERT_COOLDOWN_MS) return;
+      lastAlertTime[cooldownKey] = now;
+      try { localStorage.setItem(LS_ALERT_COOLDOWN, JSON.stringify(lastAlertTime)); } catch {}
 
       // Fire!
-      showAlertBanner(symbol, currentCorr, stats.mean, deviation, stats.stddev);
+      showAlertBanner(FOCUS, symbol, currentCorr, stats.mean, deviation, stats.stddev);
       logAlert({
         t: now,
+        focus: FOCUS,
         symbol,
         corr: currentCorr,
         mean: stats.mean,
@@ -1164,6 +1460,7 @@ footer a:hover { color: var(--muted); }
   const REGIME_PANIC_DROP = -0.03;   // 24h drop threshold for panic (-3%)
 
   const REGIMES = {
+    PARTIAL:  { label: "PARTIAL",  color: "#ffa500" },
     HERD:     { label: "HERD",     color: "#39ff14" }, // green — everything in sync
     PANIC:    { label: "PANIC",    color: "#ff5500" }, // orange — correlated selloff
     ROTATION: { label: "ROTATION", color: "#00f0ff" }, // cyan — money moving between alts
@@ -1176,9 +1473,9 @@ footer a:hover { color: var(--muted); }
    * @returns {{ label: string, color: string }}
    */
   function classifyRegime(peerData, focusBias24h) {
-    // Filter to alts with valid data
+    // Filter to peers with valid data
     const valid = peerData.filter(p => p.corr !== null && p.bias24h !== null);
-    if (valid.length < 3) return REGIMES.DRIFT; // not enough data
+    if (valid.length < Math.ceil(peerData.length * 0.6)) return REGIMES.PARTIAL;
 
     // Axis 1: average |correlation|
     const avgAbsCorr = valid.reduce((s, p) => s + Math.abs(p.corr), 0) / valid.length;
@@ -1249,18 +1546,43 @@ footer a:hover { color: var(--muted); }
 
   const ANGLE_OFFSET = -Math.PI / 2;
   const peerAngle = (i) => ANGLE_OFFSET + (i / PEERS.length) * Math.PI * 2;
+  const shortLandscape = () => window.matchMedia?.("(orientation: landscape) and (max-height: 500px)").matches === true;
+  const compactViewport = () => window.matchMedia?.("(max-width: 600px)").matches === true || shortLandscape();
+  const ringInner = () => compactViewport() ? 190 : RING_INNER;
+  const ringOuter = () => compactViewport() ? 292 : RING_OUTER;
+  const peerHexBase = () => compactViewport() ? 36 : PEER_HEX_R;
+  const peerHexXScale = () => compactViewport() ? 1.34 : 1;
+  function peerVolScale(volRatio) {
+    const raw = Math.min(1.8, Math.max(0.6, volRatio || 1));
+    return compactViewport() ? Math.min(1.15, Math.max(0.88, raw)) : raw;
+  }
 
   const dot = document.getElementById("dot");
   const dotText = document.getElementById("dot-text");
+  const dataNotice = document.getElementById("data-notice");
   const loading = document.getElementById("loading");
+  const radarWrap = document.getElementById("radar-wrap");
+  const radarSvg = document.getElementById("radar");
   const linesG = document.getElementById("lines");
   const peersG = document.getElementById("peers");
+  const overviewG = document.getElementById("overview");
   const clockEl = document.getElementById("clock");
+  const briefKicker = document.getElementById("brief-kicker");
+  const briefState = document.getElementById("brief-state");
+  const briefCorr = document.getElementById("brief-corr");
+  const briefAlign = document.getElementById("brief-align");
+  const briefCoverage = document.getElementById("brief-coverage");
+  const briefNarrative = document.getElementById("brief-narrative");
   const focusPriceEl = document.getElementById("focus-price");
   const focusVerdictEl = document.getElementById("focus-verdict");
   const focusGlowEl = document.getElementById("focus-glow");
   const focusHexEl = document.getElementById("focus-hex");
   const focusTickerEl = document.getElementById("focus-ticker");
+  const assetModal = document.getElementById("asset-modal");
+  const assetModalInner = assetModal.querySelector(".info-modal-inner");
+  const assetTitle = document.getElementById("asset-title");
+  const assetBody = document.getElementById("asset-body");
+  const assetClose = document.getElementById("asset-close");
 
   function updateFocusColor(up) {
     // null/undefined = no data → magenta fallback
@@ -1308,24 +1630,37 @@ footer a:hover { color: var(--muted); }
     positionTooltip(e);
   });
   focusG.addEventListener("mousemove", (e) => {
-    const tt = document.getElementById("peer-tooltip");
-    const pad = 12;
-    let left = e.clientX + pad;
-    let top = e.clientY + pad;
-    const rect = tt.getBoundingClientRect();
-    if (left + rect.width > window.innerWidth - pad) left = e.clientX - rect.width - pad;
-    if (top + rect.height > window.innerHeight - pad) top = e.clientY - rect.height - pad;
-    tt.style.left = left + "px";
-    tt.style.top = top + "px";
+    positionTooltip(e);
   });
   focusG.addEventListener("mouseleave", () => {
     document.getElementById("peer-tooltip").style.display = "none";
+  });
+  focusG.setAttribute("tabindex", "0");
+  focusG.setAttribute("role", "button");
+  focusG.addEventListener("click", () => openFocusDetail(lastComputedData));
+  focusG.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openFocusDetail(lastComputedData);
+    }
   });
 
   function setStatus(state, text) {
     dot.className = "status-dot " + (state || "");
     dotText.textContent = text;
   }
+
+  function showDataNotice(kind, message) {
+    dataNotice.className = kind || "";
+    dataNotice.textContent = message;
+  }
+
+  function hideDataNotice() {
+    dataNotice.className = "hidden";
+    dataNotice.textContent = "";
+  }
+
+  dataNotice.addEventListener("click", () => loadAndRender(true));
 
   function fmtPrice(p) {
     if (!Number.isFinite(p)) return "—";
@@ -1334,47 +1669,144 @@ footer a:hover { color: var(--muted); }
     return "$" + p.toFixed(4);
   }
 
-  function hexPath(cx, cy, r) {
+  function fmtSignedPercent(value, digits = 1) {
+    if (!Number.isFinite(value)) return "—";
+    const pctValue = value * 100;
+    return `${pctValue >= 0 ? "+" : ""}${pctValue.toFixed(digits)}%`;
+  }
+
+  function openAssetDetail(peer) {
+    if (!peer) return;
+    const corrText = Number.isFinite(peer.corr) ? peer.corr.toFixed(2) : "NO DATA";
+    const deltaText = Number.isFinite(peer.corrDelta) ? `${peer.corrDelta >= 0 ? "+" : ""}${peer.corrDelta.toFixed(2)}` : "—";
+    const volText = Number.isFinite(peer.volRatio) ? `${peer.volRatio.toFixed(2)}×` : "—";
+    const directionColor = Number.isFinite(peer.bias24h) && peer.bias24h >= 0 ? "var(--green)" : "var(--orange)";
+    assetTitle.textContent = `$${peer.symbol} / $${FOCUS}`;
+    assetBody.innerHTML = `
+      <div class="asset-grid">
+        <div class="asset-metric"><span class="brief-label">CORRELATION</span><span class="asset-value">${corrText}</span></div>
+        <div class="asset-metric"><span class="brief-label">24H CHANGE</span><span class="asset-value" style="color:${directionColor}">${fmtSignedPercent(peer.bias24h)}</span></div>
+        <div class="asset-metric"><span class="brief-label">24H Δ |CORR|</span><span class="asset-value">${deltaText}</span></div>
+        <div class="asset-metric"><span class="brief-label">REL VOLATILITY</span><span class="asset-value">${volText}</span></div>
+      </div>
+      <p class="asset-summary">${describePeer(peer.symbol, peer.corr, peer.bias24h, peer.volRatio)}</p>`;
+    assetModal.classList.remove("hidden");
+    assetModalInner.focus();
+  }
+
+  function openFocusDetail(data) {
+    if (!data) return;
+    const alignment = data.totalCount > 0 ? data.confirmCount / data.totalCount : null;
+    const regime = classifyRegime(data.peerResults, data.focusChg);
+    assetTitle.textContent = `$${FOCUS} FOCUS`;
+    assetBody.innerHTML = `
+      <div class="asset-grid">
+        <div class="asset-metric"><span class="brief-label">PRICE</span><span class="asset-value">${fmtPrice(data.focusLast)}</span></div>
+        <div class="asset-metric"><span class="brief-label">24H CHANGE</span><span class="asset-value">${fmtSignedPercent(data.focusChg)}</span></div>
+        <div class="asset-metric"><span class="brief-label">REGIME</span><span class="asset-value" style="color:${regime.color}">${regime.label}</span></div>
+        <div class="asset-metric"><span class="brief-label">ALIGNMENT</span><span class="asset-value">${pct(alignment)}</span></div>
+      </div>
+      <p class="asset-summary">${data.confirmCount}/${data.totalCount} available peers confirm ${FOCUS}'s 24-hour direction.</p>`;
+    assetModal.classList.remove("hidden");
+    assetModalInner.focus();
+  }
+
+  function closeAssetDetail() {
+    assetModal.classList.add("hidden");
+    focusG.focus();
+  }
+  assetClose.addEventListener("click", closeAssetDetail);
+  assetModal.addEventListener("click", event => { if (event.target === assetModal) closeAssetDetail(); });
+
+  function hexPath(cx, cy, r, xScale = 1) {
     const pts = [];
     for (let i = 0; i < 6; i++) {
       const a = -Math.PI / 2 + i * Math.PI / 3;
-      pts.push((cx + r * Math.cos(a)).toFixed(1) + "," + (cy + r * Math.sin(a)).toFixed(1));
+      pts.push((cx + xScale * r * Math.cos(a)).toFixed(1) + "," + (cy + r * Math.sin(a)).toFixed(1));
     }
     return pts.join(" ");
+  }
+
+  function metricLabelPoint(x, y, angle, hexR) {
+    const offset = hexR + (compactViewport() ? 58 : 12);
+    let lx = x + offset * Math.cos(angle);
+    let ly = y + offset * Math.sin(angle);
+
+    if (compactViewport()) {
+      lx = Math.min(736, Math.max(64, lx));
+      ly = Math.min(748, Math.max(52, ly));
+    }
+
+    return { lx, ly };
   }
 
   function tickClock() {
     const now = new Date();
     const hh = String(now.getUTCHours()).padStart(2, "0");
     const mm = String(now.getUTCMinutes()).padStart(2, "0");
-    const ss = String(now.getUTCSeconds()).padStart(2, "0");
-    clockEl.textContent = `${hh}:${mm}:${ss} UTC`;
+    clockEl.textContent = `${hh}:${mm} UTC`;
   }
   setInterval(tickClock, 1000);
   tickClock();
 
-  async function fetchCandles(symbol) {
+  async function fetchCandles(symbol, parentSignal) {
     const product = `${symbol}-USD`;
-    const end = new Date();
-    const start = new Date(end.getTime() - HOURS * GRANULARITY * 1000);
+    const currentHour = Math.floor(Date.now() / (GRANULARITY * 1000)) * GRANULARITY * 1000;
+    const end = new Date(currentHour);
+    const start = new Date(end.getTime() - FETCH_HOURS * GRANULARITY * 1000);
     const url = `${COINBASE}/${product}/candles?granularity=${GRANULARITY}` +
                 `&start=${encodeURIComponent(start.toISOString())}` +
                 `&end=${encodeURIComponent(end.toISOString())}`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`${product} ${r.status}`);
-    const rows = await r.json();
-    if (!Array.isArray(rows) || rows.length === 0) return null;
-    return rows
-      .map(row => ({ t: row[0], close: row[4] }))
-      .filter(r => Number.isFinite(r.close))
-      .sort((a, b) => a.t - b.t);
+    const controller = new AbortController();
+    const abortFromParent = () => controller.abort();
+    parentSignal?.addEventListener("abort", abortFromParent, { once: true });
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+      if (!response.ok) throw new Error(`${product} ${response.status}`);
+      const rows = await response.json();
+      if (!Array.isArray(rows) || rows.length === 0) return null;
+      const byTimestamp = new Map();
+      for (const row of rows) {
+        if (!Array.isArray(row) || row.length < 5) continue;
+        const bar = { t: Number(row[0]), low: Number(row[1]), high: Number(row[2]), open: Number(row[3]), close: Number(row[4]) };
+        if (!Number.isFinite(bar.t) || !Number.isFinite(bar.close) || bar.close <= 0) continue;
+        if (bar.t >= currentHour / 1000) continue;
+        byTimestamp.set(bar.t, bar);
+      }
+      return Array.from(byTimestamp.values()).sort((a, b) => a.t - b.t);
+    } finally {
+      clearTimeout(timeout);
+      parentSignal?.removeEventListener("abort", abortFromParent);
+    }
+  }
+
+  async function fetchQuote(symbol, parentSignal) {
+    const controller = new AbortController();
+    const abortFromParent = () => controller.abort();
+    parentSignal?.addEventListener("abort", abortFromParent, { once: true });
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(`${COINBASE}/${symbol}-USD/ticker`, {
+        signal: controller.signal,
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(`${symbol}-USD ticker ${response.status}`);
+      const payload = await response.json();
+      const price = Number(payload?.price);
+      return Number.isFinite(price) && price > 0 ? price : null;
+    } finally {
+      clearTimeout(timeout);
+      parentSignal?.removeEventListener("abort", abortFromParent);
+    }
   }
 
   function logReturns(series) {
     const out = [];
     for (let i = 1; i < series.length; i++) {
       const prev = series[i-1].close, curr = series[i].close;
-      if (prev > 0 && curr > 0) out.push({ t: series[i].t, r: Math.log(curr / prev) });
+      const consecutive = series[i].t - series[i - 1].t === GRANULARITY;
+      if (consecutive && prev > 0 && curr > 0) out.push({ t: series[i].t, r: Math.log(curr / prev) });
     }
     return out;
   }
@@ -1403,18 +1835,35 @@ footer a:hover { color: var(--muted); }
     return [xs, ys];
   }
 
+  function trailingWindow(series, hours, endT = null) {
+    if (!series || series.length === 0) return [];
+    const cutoff = endT === null ? series[series.length - 1].t : endT;
+    const start = cutoff - hours * 3600;
+    return series.filter(bar => bar.t > start && bar.t <= cutoff);
+  }
+
+  function computeCorrForWindow(focusSeries, peerSeries, endT) {
+    const focusWindow = trailingWindow(focusSeries, HOURS, endT);
+    const peerWindow = trailingWindow(peerSeries, HOURS, endT);
+    if (focusWindow.length < 48 || peerWindow.length < 48) return null;
+    const [xs, ys] = alignReturns(logReturns(focusWindow), logReturns(peerWindow));
+    return pearson(xs, ys);
+  }
+
   function changePct24h(series) {
-    if (series.length < 24) return null;
-    const last = series[series.length - 1].close;
-    const prev = series[series.length - 24].close;
-    if (!(prev > 0)) return null;
-    return (last - prev) / prev;
+    if (!series || series.length < 2) return null;
+    const latest = series[series.length - 1];
+    const prior = series.find(bar => bar.t === latest.t - 24 * 3600);
+    if (!prior || !(prior.close > 0)) return null;
+    return (latest.close - prior.close) / prior.close;
   }
 
   function corrToRadius(c) {
-    if (!Number.isFinite(c)) return RING_OUTER;
+    const inner = ringInner();
+    const outer = ringOuter();
+    if (!Number.isFinite(c)) return outer;
     const mag = Math.min(1, Math.max(0, Math.abs(c)));
-    return RING_INNER + (RING_OUTER - RING_INNER) * (1 - mag);
+    return inner + (outer - inner) * (1 - mag);
   }
 
   // ── Tooltip ──
@@ -1468,6 +1917,8 @@ footer a:hover { color: var(--muted); }
     const rect = tt.getBoundingClientRect();
     if (left + rect.width > window.innerWidth - pad) left = e.clientX - rect.width - pad;
     if (top + rect.height > window.innerHeight - pad) top = e.clientY - rect.height - pad;
+    left = Math.max(pad, Math.min(left, window.innerWidth - rect.width - pad));
+    top = Math.max(pad, Math.min(top, window.innerHeight - rect.height - pad));
     tt.style.left = left + "px";
     tt.style.top = top + "px";
   }
@@ -1476,26 +1927,28 @@ footer a:hover { color: var(--muted); }
     peerTooltip.style.display = "none";
   }
 
-  function renderPeer(i, symbol, corr, bias24h, volRatio) {
+  function renderPeer(i, symbol, corr, bias24h, volRatio, corrDelta) {
     const angle = peerAngle(i);
     const r = corrToRadius(corr);
     const x = CX + r * Math.cos(angle);
     const y = CY + r * Math.sin(angle);
-    const isUp = bias24h !== null && bias24h >= 0;
-    const isInverse = corr !== null && corr < 0;
-    const color = isUp ? "#39ff14" : "#ff5500";
-    const glowId = isUp ? "ug" : "dg";
+    const hasData = Number.isFinite(corr) && Number.isFinite(bias24h);
+    const isUp = hasData && bias24h >= 0;
+    const isInverse = Number.isFinite(corr) && corr < 0;
+    const color = !hasData ? "#696b86" : (isUp ? "#39ff14" : "#ff5500");
+    const glowId = !hasData ? "fg" : (isUp ? "ug" : "dg");
 
     // Vol-adjusted scaling: volRatio = peer_vol / btc_vol
-    const vScale = Math.min(1.8, Math.max(0.6, volRatio || 1));
-    const hexR = PEER_HEX_R * vScale;
-    const strokeW = 1.4 * Math.min(1.5, Math.max(0.7, vScale));
+    // >1 means more volatile than BTC → bigger hex; <1 → smaller
+    const vScale = peerVolScale(volRatio);
+    const hexR = peerHexBase() * vScale;
+    const strokeW = compactViewport() ? 2.6 : 1.4 * Math.min(1.5, Math.max(0.7, vScale));
 
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", CX); line.setAttribute("y1", CY);
     line.setAttribute("x2", x.toFixed(1)); line.setAttribute("y2", y.toFixed(1));
     line.setAttribute("stroke", color);
-    line.setAttribute("stroke-width", "0.5");
+    line.setAttribute("stroke-width", compactViewport() ? "1.2" : "0.8");
     line.setAttribute("stroke-dasharray", "3 3");
     line.setAttribute("opacity", "0.45");
     linesG.appendChild(line);
@@ -1503,15 +1956,26 @@ footer a:hover { color: var(--muted); }
     // Hoverable group for glow + hex + labels
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     g.style.cursor = "pointer";
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    g.setAttribute("aria-label", `${symbol} detail relative to ${FOCUS}`);
+
+    const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    hit.setAttribute("cx", x.toFixed(1)); hit.setAttribute("cy", y.toFixed(1));
+    hit.setAttribute("r", Math.max(shortLandscape() ? 70 : 48, hexR + 8).toFixed(1));
+    hit.setAttribute("fill", "transparent");
+    hit.setAttribute("pointer-events", "all");
+    g.appendChild(hit);
 
     const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
-    glow.setAttribute("r", hexR + 8);
+    glow.setAttribute("r", compactViewport() ? hexR + 16 : hexR + 8);
     glow.setAttribute("fill", `url(#${glowId})`);
+    if (!hasData) glow.setAttribute("opacity", "0.12");
     g.appendChild(glow);
 
     const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    hex.setAttribute("points", hexPath(x, y, hexR));
+    hex.setAttribute("points", hexPath(x, y, hexR, peerHexXScale()));
     hex.setAttribute("fill", "#0a0a14");
     hex.setAttribute("stroke", color);
     hex.setAttribute("stroke-width", strokeW.toFixed(1));
@@ -1520,31 +1984,39 @@ footer a:hover { color: var(--muted); }
 
     const ticker = document.createElementNS("http://www.w3.org/2000/svg", "text");
     ticker.setAttribute("x", x.toFixed(1));
-    ticker.setAttribute("y", (y + 3).toFixed(1));
+    ticker.setAttribute("y", (y + (compactViewport() ? 8 : 3)).toFixed(1));
     ticker.setAttribute("text-anchor", "middle");
+    ticker.setAttribute("class", "ticker-label");
     ticker.setAttribute("fill", color);
-    ticker.setAttribute("font-size", "10");
+    ticker.setAttribute("font-size", compactViewport() ? "32" : "10");
     ticker.setAttribute("font-weight", "700");
-    ticker.setAttribute("font-family", "JetBrains Mono, monospace");
+    ticker.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
     ticker.textContent = "$" + symbol;
     g.appendChild(ticker);
 
-    const cornerOff = hexR + 12;
-    const lx = x + cornerOff * Math.cos(angle);
-    const ly = y + cornerOff * Math.sin(angle);
+    const { lx, ly } = metricLabelPoint(x, y, angle, hexR);
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
     label.setAttribute("x", lx.toFixed(1));
     label.setAttribute("y", ly.toFixed(1));
     label.setAttribute("text-anchor", "middle");
+    label.setAttribute("class", "corr-value");
     label.setAttribute("fill", "#7a8aff");
-    label.setAttribute("font-size", "9");
-    label.setAttribute("font-family", "JetBrains Mono, monospace");
-    label.textContent = corr === null ? "—" : corr.toFixed(2);
+    label.setAttribute("font-size", compactViewport() ? "32" : "9");
+    label.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
+    label.textContent = Number.isFinite(corr) ? corr.toFixed(2) : "N/A";
     g.appendChild(label);
 
     g.addEventListener("mouseenter", (e) => showTooltip(e, symbol, corr, bias24h, volRatio));
     g.addEventListener("mousemove", positionTooltip);
     g.addEventListener("mouseleave", hideTooltip);
+    const peer = { symbol, corr, bias24h, volRatio, corrDelta };
+    g.addEventListener("click", () => openAssetDetail(peer));
+    g.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openAssetDetail(peer);
+      }
+    });
 
     peersG.appendChild(g);
   }
@@ -1556,12 +2028,11 @@ footer a:hover { color: var(--muted); }
      redundant alts (high |corr|) pushed to the rim.
 
      Scoring:
-       diversification score = 1 - |corr|   (0 = redundant, 1 = perfect diversifier)
-       weight = inverse-vol × divScore, normalized to 100%
+       diversification score = 1 - |corr|   (0 = tightly coupled, 1 = independent)
      ═══════════════════════════════════════════════════ */
 
-  let viewMode = "radar"; // "radar" | "diversify" | "overview"
-  let lastComputedData = null; // cached for re-renders on toggle
+  let viewMode = localStorage.getItem("el5_view") || "overview"; // overview | radar | diversify
+  if (!["overview", "radar", "diversify"].includes(viewMode)) viewMode = "overview";
 
   const viewToggle = document.getElementById("view-toggle");
   const ringsG = document.getElementById("rings");
@@ -1579,11 +2050,7 @@ footer a:hover { color: var(--muted); }
 
   function computeVolatility(series) {
     if (!series || series.length < 24) return null;
-    const rets = [];
-    for (let i = 1; i < series.length; i++) {
-      const prev = series[i-1].close, curr = series[i].close;
-      if (prev > 0 && curr > 0) rets.push(Math.log(curr / prev));
-    }
+    const rets = logReturns(series).map(point => point.r);
     if (rets.length < 10) return null;
     const mean = rets.reduce((s, v) => s + v, 0) / rets.length;
     const variance = rets.reduce((s, v) => s + (v - mean) ** 2, 0) / rets.length;
@@ -1594,57 +2061,50 @@ footer a:hover { color: var(--muted); }
     const valid = peerResults
       .map(p => ({ ...p })) // shallow copy to avoid mutating cached data
       .filter(p => p.corr !== null && p.vol !== null && p.vol > 0);
-    if (valid.length === 0) return peerResults.map(p => ({ ...p, divScore: null, weight: null }));
+    if (valid.length === 0) return peerResults.map(p => ({ ...p, divScore: null }));
 
     for (const p of valid) {
       p.divScore = 1 - Math.min(1, Math.abs(p.corr));
     }
 
-    let totalRaw = 0;
-    for (const p of valid) {
-      p.rawWeight = (1 / p.vol) * p.divScore;
-      totalRaw += p.rawWeight;
-    }
-    for (const p of valid) {
-      p.weight = totalRaw > 0 ? p.rawWeight / totalRaw : 0;
-    }
-
     return peerResults.map(p => {
       const match = valid.find(v => v.symbol === p.symbol);
-      return match || { ...p, divScore: null, weight: null };
+      return match || { ...p, divScore: null };
     });
   }
 
   // Best diversifiers (high divScore) CLOSE to center, redundant FAR
   function divScoreToRadius(divScore) {
-    if (!Number.isFinite(divScore)) return RING_OUTER;
+    const inner = ringInner();
+    const outer = ringOuter();
+    if (!Number.isFinite(divScore)) return outer;
     const clamped = Math.min(1, Math.max(0, divScore));
-    return RING_INNER + (RING_OUTER - RING_INNER) * (1 - clamped);
+    return inner + (outer - inner) * (1 - clamped);
   }
 
   function renderDiversifyPeer(i, peerData) {
-    const { symbol, corr, divScore, weight, volRatio, bias24h } = peerData;
+    const { symbol, corr, corrDelta, divScore, volRatio, bias24h } = peerData;
     const angle = peerAngle(i);
     const r = divScoreToRadius(divScore);
     const x = CX + r * Math.cos(angle);
     const y = CY + r * Math.sin(angle);
 
     // Vol-adjusted scaling (same logic as radar mode)
-    const vScale = Math.min(1.8, Math.max(0.6, volRatio || 1));
-    const hexR = PEER_HEX_R * vScale;
-    const strokeW = 1.4 * Math.min(1.5, Math.max(0.7, vScale));
+    const vScale = peerVolScale(volRatio);
+    const hexR = peerHexBase() * vScale;
+    const strokeW = compactViewport() ? 2.6 : 1.4 * Math.min(1.5, Math.max(0.7, vScale));
 
-    const quality = divScore !== null ? divScore : 0;
-    const color = quality >= 0.5 ? "#39ff14" :
+    const quality = Number.isFinite(divScore) ? divScore : null;
+    const color = quality === null ? "#696b86" : quality >= 0.5 ? "#39ff14" :
                   quality >= 0.25 ? "#00f0ff" :
                   quality >= 0.1 ? "#7a8aff" : "#ff5500";
-    const glowId = quality >= 0.5 ? "ug" : quality < 0.1 ? "dg" : "ug";
+    const glowId = quality !== null && quality >= 0.5 ? "ug" : quality !== null && quality < 0.1 ? "dg" : "ug";
 
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", CX); line.setAttribute("y1", CY);
     line.setAttribute("x2", x.toFixed(1)); line.setAttribute("y2", y.toFixed(1));
     line.setAttribute("stroke", color);
-    line.setAttribute("stroke-width", "0.5");
+    line.setAttribute("stroke-width", compactViewport() ? "1.2" : "0.8");
     line.setAttribute("stroke-dasharray", "3 3");
     line.setAttribute("opacity", "0.3");
     linesG.appendChild(line);
@@ -1652,15 +2112,25 @@ footer a:hover { color: var(--muted); }
     // Hoverable group
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     g.style.cursor = "pointer";
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    g.setAttribute("aria-label", `${symbol} diversification detail relative to ${FOCUS}`);
+
+    const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    hit.setAttribute("cx", x.toFixed(1)); hit.setAttribute("cy", y.toFixed(1));
+    hit.setAttribute("r", Math.max(shortLandscape() ? 70 : 48, hexR + 8).toFixed(1));
+    hit.setAttribute("fill", "transparent");
+    hit.setAttribute("pointer-events", "all");
+    g.appendChild(hit);
 
     const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     glow.setAttribute("cx", x.toFixed(1)); glow.setAttribute("cy", y.toFixed(1));
-    glow.setAttribute("r", hexR + 8);
+    glow.setAttribute("r", compactViewport() ? hexR + 16 : hexR + 8);
     glow.setAttribute("fill", `url(#${glowId})`);
     g.appendChild(glow);
 
     const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    hex.setAttribute("points", hexPath(x, y, hexR));
+    hex.setAttribute("points", hexPath(x, y, hexR, peerHexXScale()));
     hex.setAttribute("fill", "#0a0a14");
     hex.setAttribute("stroke", color);
     hex.setAttribute("stroke-width", strokeW.toFixed(1));
@@ -1668,43 +2138,51 @@ footer a:hover { color: var(--muted); }
 
     const ticker = document.createElementNS("http://www.w3.org/2000/svg", "text");
     ticker.setAttribute("x", x.toFixed(1));
-    ticker.setAttribute("y", (y - 2).toFixed(1));
+    ticker.setAttribute("y", (y - (compactViewport() ? 7 : 3)).toFixed(1));
     ticker.setAttribute("text-anchor", "middle");
+    ticker.setAttribute("class", "diversify-ticker");
     ticker.setAttribute("fill", color);
-    ticker.setAttribute("font-size", "10");
+    ticker.setAttribute("font-size", compactViewport() ? "30" : "10");
     ticker.setAttribute("font-weight", "700");
-    ticker.setAttribute("font-family", "JetBrains Mono, monospace");
+    ticker.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
     ticker.textContent = "$" + symbol;
     g.appendChild(ticker);
 
     const wtText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     wtText.setAttribute("x", x.toFixed(1));
-    wtText.setAttribute("y", (y + 10).toFixed(1));
+    wtText.setAttribute("y", (y + (compactViewport() ? 12 : 10)).toFixed(1));
     wtText.setAttribute("text-anchor", "middle");
+    wtText.setAttribute("class", "score-badge");
     wtText.setAttribute("fill", color);
-    wtText.setAttribute("font-size", "9");
+    wtText.setAttribute("font-size", compactViewport() ? "24" : "9");
     wtText.setAttribute("font-weight", "700");
-    wtText.setAttribute("font-family", "JetBrains Mono, monospace");
+    wtText.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
     wtText.setAttribute("opacity", "0.8");
-    wtText.textContent = weight !== null ? (weight * 100).toFixed(1) + "%" : "—";
+    wtText.textContent = Number.isFinite(divScore) ? divScore.toFixed(2) : "—";
     g.appendChild(wtText);
 
-    const cornerOff = hexR + 12;
-    const lx = x + cornerOff * Math.cos(angle);
-    const ly = y + cornerOff * Math.sin(angle);
+    const { lx, ly } = metricLabelPoint(x, y, angle, hexR);
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
     label.setAttribute("x", lx.toFixed(1));
     label.setAttribute("y", ly.toFixed(1));
     label.setAttribute("text-anchor", "middle");
+    label.setAttribute("class", "corr-value");
     label.setAttribute("fill", "#7a8aff");
-    label.setAttribute("font-size", "9");
-    label.setAttribute("font-family", "JetBrains Mono, monospace");
-    label.textContent = divScore !== null ? "d:" + divScore.toFixed(2) : "—";
+    label.setAttribute("font-size", compactViewport() ? "30" : "9");
+    label.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
+    label.textContent = Number.isFinite(corr) ? "r:" + corr.toFixed(2) : "N/A";
     g.appendChild(label);
 
     g.addEventListener("mouseenter", (e) => showTooltip(e, symbol, corr, bias24h, volRatio));
     g.addEventListener("mousemove", positionTooltip);
     g.addEventListener("mouseleave", hideTooltip);
+    g.addEventListener("click", () => openAssetDetail({ symbol, corr, corrDelta, bias24h, volRatio }));
+    g.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openAssetDetail({ symbol, corr, corrDelta, bias24h, volRatio });
+      }
+    });
 
     peersG.appendChild(g);
   }
@@ -1714,14 +2192,34 @@ footer a:hover { color: var(--muted); }
     const labels = mode === "diversify" ? DIV_RING_LABELS : ORIG_RING_LABELS;
     texts.forEach((t, i) => {
       if (labels[i]) t.textContent = labels[i].text;
+      t.setAttribute("font-size", compactViewport() ? "22" : "8");
     });
   }
 
-  const overviewG = document.getElementById("overview");
+  function applyRadarViewport() {
+    const overview = viewMode === "overview";
+    radarWrap.classList.toggle("overview", overview);
+    radarSvg.setAttribute("viewBox", overview ? "0 150 800 500" : "0 0 800 800");
+  }
+
+  function applyFocusLayout() {
+    const compact = compactViewport();
+    focusGlowEl.setAttribute("r", compact ? "86" : "62");
+    focusHexEl.setAttribute("points", hexPath(CX, CY, compact ? 74 : 56, compact ? 1.18 : 1));
+    focusHexEl.setAttribute("stroke-width", compact ? "2.8" : "1.6");
+    focusTickerEl.setAttribute("font-size", compact ? "38" : "20");
+    focusPriceEl.setAttribute("font-size", compact ? "21" : "11");
+    focusVerdictEl.setAttribute("font-size", compact ? "23" : "13");
+    regimeLabel.setAttribute("font-size", compact ? "18" : "12");
+    focusTickerEl.setAttribute("y", compact ? "382" : "388");
+    focusPriceEl.setAttribute("y", compact ? "414" : "406");
+    focusVerdictEl.setAttribute("y", compact ? "440" : "421");
+    regimeLabel.setAttribute("y", compact ? "464" : "444");
+  }
+
   const channelSection = document.getElementById("channel-section");
   const channelHeaderEl = document.getElementById("channel-header");
 
-  // Show/hide the radar groups vs. the consolidated overview group.
   function applyViewVisibility() {
     const overview = viewMode === "overview";
     overviewG.style.display = overview ? "" : "none";
@@ -1732,36 +2230,67 @@ footer a:hover { color: var(--muted); }
     channelSection.style.display = overview ? "none" : "";
   }
 
+  function renderMarketBrief(data) {
+    if (!data) return;
+    const structure = describeStructure(data);
+    const regime = classifyRegime(data.peerResults, data.focusChg);
+    const alignment = data.totalCount > 0 ? data.confirmCount / data.totalCount : null;
+    const asOf = Number.isFinite(data.latestT) ? new Date(data.latestT * 1000).toISOString().substring(11, 16) + "Z" : "—";
+    briefKicker.textContent = `${FOCUS} STRUCTURE · AS OF ${asOf}`;
+    briefState.textContent = structure ? `${regime.label} · ${structure.movement}` : regime.label;
+    briefState.style.color = regime.color;
+    briefCorr.textContent = structure && Number.isFinite(structure.currentAvg) ? structure.currentAvg.toFixed(2) : "—";
+    briefAlign.textContent = pct(alignment);
+    briefCoverage.textContent = `${data.availableCount || 0}/${data.requestedCount || PEERS.length}`;
+
+    if (!structure) {
+      briefNarrative.textContent = "Waiting for enough completed candles to describe market structure.";
+      return;
+    }
+    if ((data.availableCount || 0) < Math.ceil((data.requestedCount || PEERS.length) * 0.6)) {
+      briefNarrative.textContent = "Coverage is incomplete. Structure classification is paused until more peer data is available.";
+      return;
+    }
+    const coupled = structure.mostCoupled ? `${structure.mostCoupled.symbol} is most coupled` : "Coupling is unavailable";
+    const least = structure.leastCoupled ? `${structure.leastCoupled.symbol} is least coupled` : "independence is unavailable";
+    const delta = Number.isFinite(structure.avgDelta)
+      ? `Average coupling ${structure.avgDelta >= 0 ? "rose" : "fell"} ${Math.abs(structure.avgDelta).toFixed(2)} in 24h.`
+      : "A 24-hour structure comparison is not available yet.";
+    briefNarrative.textContent = `${delta} ${coupled}; ${least}.`;
+  }
+
   function renderView(data) {
+    if (!data) return;
+    applyRadarViewport();
+    applyFocusLayout();
     applyViewVisibility();
+    renderMarketBrief(data);
+    focusTickerEl.textContent = "$" + FOCUS;
+    channelHeaderEl.textContent = `${FOCUS} CHANNEL`;
+    focusG.setAttribute("aria-label", `${FOCUS} focus detail`);
 
     if (viewMode === "overview") {
       renderOverview();
       return;
     }
 
-    if (!data) return;
     linesG.innerHTML = "";
     peersG.innerHTML = "";
-
-    // Keep the focus hex label + channel header in sync with the active coin.
-    focusTickerEl.textContent = "$" + FOCUS;
-    channelHeaderEl.textContent = "▌ " + FOCUS + " CHANNEL";
 
     if (viewMode === "diversify") {
       updateRingLabels("diversify");
       const scored = computeDiversificationScores(data.peerResults);
       scored.forEach((p, i) => renderDiversifyPeer(i, p));
 
-      focusPriceEl.textContent = "YOUR HOLD";
-      focusVerdictEl.textContent = "DIVERSIFY ↓";
+      focusPriceEl.textContent = "LOW |CORR|";
+      focusVerdictEl.textContent = "SCORE ↑";
       focusVerdictEl.setAttribute("fill", "#00f0ff");
-      updateFocusColor(null); // magenta in diversify mode
-      regimeLabel.textContent = "▌ ADD ALTS BY SCORE";
-      regimeLabel.setAttribute("fill", "#3a3a55");
+      updateFocusColor(null);
+      regimeLabel.textContent = "DIVERSIFICATION";
+      regimeLabel.setAttribute("fill", "#696b86");
     } else {
       updateRingLabels("radar");
-      data.peerResults.forEach((p, i) => renderPeer(i, p.symbol, p.corr, p.bias24h, p.volRatio));
+      data.peerResults.forEach((p, i) => renderPeer(i, p.symbol, p.corr, p.bias24h, p.volRatio, p.corrDelta));
 
       focusPriceEl.textContent = fmtPrice(data.focusLast);
       const pct = data.totalCount > 0 ? Math.round((data.confirmCount / data.totalCount) * 100) : 0;
@@ -1770,455 +2299,265 @@ footer a:hover { color: var(--muted); }
       focusVerdictEl.setAttribute("fill", data.focusUp ? "#e8e8ff" : "#ff10f0");
       updateFocusColor(data.focusUp);
       lastFocusTooltipData = data;
-      const regime = classifyRegime(data.peerResults.map(p => ({ corr: p.corr, bias24h: p.bias24h })), data.focusChg);
+      const regime = classifyRegime(data.peerResults, data.focusChg);
       updateRegimeLabel(regime);
     }
-
   }
-
-  /* ═══════════════════════════════════════════════════
-     CONSOLIDATED OVERVIEW — the four majors, hexes only
-     ─────────────────────────────────────────────────
-     Just the focus hex for each switchable coin (no peer
-     ring). Each hex is colored by 24h direction and shows
-     price + peer-confirmation %. Click to drill into that
-     coin's full radar.
-     ═══════════════════════════════════════════════════ */
 
   const SVGNS = "http://www.w3.org/2000/svg";
 
   function renderOverview() {
     overviewG.innerHTML = "";
-    // 2×2 grid of hex centers inside the 800×800 viewBox.
-    const positions = [[262, 296], [538, 296], [262, 540], [538, 540]];
-    const hexR = 78;
+    const positions = [[245, 280], [555, 280], [245, 535], [555, 535]];
+    const hexR = compactViewport() ? 94 : 82;
 
-    SWITCHABLE.forEach((sym, idx) => {
-      const [cx, cy] = positions[idx];
-      const d = lastSeries ? computeFocusData(lastSeries, sym, false) : null;
-
-      const hasData = d && d.focusChg !== null;
-      const up = hasData ? d.focusUp : null;
-      const color = up === null ? "#ff10f0" : (up ? "#e8e8ff" : "#ff10f0");
+    SWITCHABLE.forEach((symbol, index) => {
+      const [cx, cy] = positions[index];
+      const data = lastSeries ? computeFocusData(lastSeries, symbol, false) : null;
+      const hasData = data && Number.isFinite(data.focusChg);
+      const up = hasData ? data.focusChg >= 0 : null;
+      const color = up === null ? "#696b86" : (up ? "#e8e8ff" : "#ff10f0");
       const glowId = up === null ? "fg" : (up ? "fgu" : "fgd");
+      const alignment = data && data.totalCount > 0 ? data.confirmCount / data.totalCount : null;
+      const regime = data ? classifyRegime(data.peerResults, data.focusChg) : REGIMES.PARTIAL;
 
-      const g = document.createElementNS(SVGNS, "g");
-      g.style.cursor = "pointer";
+      const group = document.createElementNS(SVGNS, "g");
+      group.style.cursor = "pointer";
+      group.setAttribute("tabindex", "0");
+      group.setAttribute("role", "button");
+      group.setAttribute("aria-label", `Open ${symbol} radar`);
+
+      const hit = document.createElementNS(SVGNS, "circle");
+      hit.setAttribute("cx", cx); hit.setAttribute("cy", cy); hit.setAttribute("r", hexR + 18);
+      hit.setAttribute("fill", "transparent"); hit.setAttribute("pointer-events", "all");
+      group.appendChild(hit);
 
       const glow = document.createElementNS(SVGNS, "circle");
-      glow.setAttribute("cx", cx); glow.setAttribute("cy", cy);
-      glow.setAttribute("r", hexR + 18);
-      glow.setAttribute("fill", `url(#${glowId})`);
-      g.appendChild(glow);
+      glow.setAttribute("cx", cx); glow.setAttribute("cy", cy); glow.setAttribute("r", hexR + 18);
+      glow.setAttribute("fill", `url(#${glowId})`); glow.setAttribute("opacity", hasData ? "1" : "0.12");
+      group.appendChild(glow);
 
       const hex = document.createElementNS(SVGNS, "polygon");
-      hex.setAttribute("points", hexPath(cx, cy, hexR));
-      hex.setAttribute("fill", "#0a0a14");
-      hex.setAttribute("stroke", color);
-      hex.setAttribute("stroke-width", "1.8");
-      g.appendChild(hex);
+      hex.setAttribute("points", hexPath(cx, cy, hexR, 1.08));
+      hex.setAttribute("fill", "#0a0a14"); hex.setAttribute("stroke", color); hex.setAttribute("stroke-width", "2.4");
+      group.appendChild(hex);
 
-      const ticker = document.createElementNS(SVGNS, "text");
-      ticker.setAttribute("x", cx); ticker.setAttribute("y", cy - 14);
-      ticker.setAttribute("text-anchor", "middle");
-      ticker.setAttribute("fill", color);
-      ticker.setAttribute("font-size", "26");
-      ticker.setAttribute("font-weight", "700");
-      ticker.setAttribute("font-family", "JetBrains Mono, monospace");
-      ticker.textContent = "$" + sym;
-      g.appendChild(ticker);
+      const addText = (y, text, size, fill, weight = "500") => {
+        const node = document.createElementNS(SVGNS, "text");
+        node.setAttribute("x", cx); node.setAttribute("y", y); node.setAttribute("text-anchor", "middle");
+        node.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
+        node.setAttribute("font-size", size); node.setAttribute("font-weight", weight); node.setAttribute("fill", fill);
+        node.textContent = text; group.appendChild(node);
+      };
+      addText(cy - 32, `$${symbol}`, 36, color, "750");
+      addText(cy + 2, data ? fmtPrice(data.focusLast) : "—", 25, "#e8e8ff", "650");
+      addText(cy + 35, hasData ? fmtSignedPercent(data.focusChg) : "NO DATA", 26, up === null ? "#8587a3" : (up ? "#39ff14" : "#ff5500"), "750");
+      addText(cy + 66, `${regime.label} · ${pct(alignment)}`, 22, regime.color, "700");
 
-      const price = document.createElementNS(SVGNS, "text");
-      price.setAttribute("x", cx); price.setAttribute("y", cy + 8);
-      price.setAttribute("text-anchor", "middle");
-      price.setAttribute("fill", "#e8e8ff");
-      price.setAttribute("font-size", "13");
-      price.setAttribute("font-family", "JetBrains Mono, monospace");
-      price.textContent = hasData ? fmtPrice(d.focusLast) : "—";
-      g.appendChild(price);
-
-      const verdict = document.createElementNS(SVGNS, "text");
-      verdict.setAttribute("x", cx); verdict.setAttribute("y", cy + 30);
-      verdict.setAttribute("text-anchor", "middle");
-      verdict.setAttribute("font-size", "15");
-      verdict.setAttribute("font-weight", "700");
-      verdict.setAttribute("font-family", "JetBrains Mono, monospace");
-      if (hasData) {
-        const chg = (d.focusChg * 100);
-        const pct = d.totalCount > 0 ? Math.round((d.confirmCount / d.totalCount) * 100) : 0;
-        const arrow = up ? "▲" : "▼";
-        verdict.setAttribute("fill", up ? "#39ff14" : "#ff5500");
-        verdict.textContent = `${chg >= 0 ? "+" : ""}${chg.toFixed(1)}% ${arrow}`;
-
-        const cons = document.createElementNS(SVGNS, "text");
-        cons.setAttribute("x", cx); cons.setAttribute("y", cy + 52);
-        cons.setAttribute("text-anchor", "middle");
-        cons.setAttribute("fill", "#7a8aff");
-        cons.setAttribute("font-size", "11");
-        cons.setAttribute("font-family", "JetBrains Mono, monospace");
-        cons.textContent = `${pct}% peers align`;
-        g.appendChild(cons);
-      } else {
-        verdict.setAttribute("fill", "#3a3a55");
-        verdict.textContent = "—";
-      }
-      g.appendChild(verdict);
-
-      g.addEventListener("click", () => selectFocus(sym));
-      overviewG.appendChild(g);
+      const open = () => selectFocus(symbol);
+      group.addEventListener("click", open);
+      group.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+      });
+      overviewG.appendChild(group);
     });
   }
 
-  viewToggle.addEventListener("click", () => {
-    if (replayMode) return;
-    // From overview, DIVERSIFY drops into the active coin's diversify view.
-    viewMode = viewMode === "diversify" ? "radar" : "diversify";
+  const switcher = document.getElementById("focus-switcher");
+  const switcherButtons = switcher.querySelectorAll(".fsw-btn");
+
+  function syncSwitcher() {
+    switcherButtons.forEach(button => {
+      const coin = button.dataset.coin;
+      const active = coin === "ALL" ? viewMode === "overview" : viewMode !== "overview" && coin === FOCUS;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
     viewToggle.classList.toggle("active", viewMode === "diversify");
-    viewToggle.textContent = viewMode === "diversify" ? "▌ RADAR" : "▌ DIVERSIFY";
+    viewToggle.textContent = viewMode === "diversify" ? "RADAR" : "DIVERSIFY";
+  }
+
+  function selectFocus(symbol) {
+    const candidate = lastSeries ? computeFocusData(lastSeries, symbol, false) : null;
+    if (!candidate) {
+      showDataNotice("error", `${symbol} DATA IS NOT AVAILABLE · TAP TO RETRY`);
+      return;
+    }
+    applyFocus(symbol);
+    viewMode = "radar";
+    try { localStorage.setItem("el5_view", viewMode); } catch {}
+    syncSwitcher();
+    recomputeAndRender(false);
+  }
+
+  function showOverview() {
+    viewMode = "overview";
+    try { localStorage.setItem("el5_view", viewMode); } catch {}
+    syncSwitcher();
+    renderView(lastComputedData);
+  }
+
+  switcherButtons.forEach(button => {
+    button.addEventListener("click", () => button.dataset.coin === "ALL" ? showOverview() : selectFocus(button.dataset.coin));
+  });
+
+  const structureBtn = document.getElementById("structure-btn");
+  const structureModal = document.getElementById("structure-modal");
+  const structureClose = document.getElementById("structure-close");
+  const structureBody = document.getElementById("structure-body");
+  const structureTitle = document.getElementById("structure-title");
+
+  function pct(n, digits = 0) {
+    return Number.isFinite(n) ? `${(n * 100).toFixed(digits)}%` : "—";
+  }
+
+  function avgAbsCorr(peerResults, key = "corr") {
+    const vals = peerResults.map(p => p[key]).filter(Number.isFinite).map(Math.abs);
+    if (vals.length === 0) return null;
+    return vals.reduce((sum, value) => sum + value, 0) / vals.length;
+  }
+
+  function strongestBy(peerResults, selector, desc = true) {
+    const valid = peerResults.filter(p => Number.isFinite(selector(p)));
+    if (valid.length === 0) return null;
+    return valid.sort((a, b) => desc ? selector(b) - selector(a) : selector(a) - selector(b))[0];
+  }
+
+  function describeStructure(data) {
+    if (!data || !data.peerResults) return null;
+    const currentAvg = avgAbsCorr(data.peerResults, "corr");
+    const previousAvg = avgAbsCorr(data.peerResults, "corrPrev");
+    const avgDelta = Number.isFinite(currentAvg) && Number.isFinite(previousAvg) ? currentAvg - previousAvg : null;
+    const confirmation = data.totalCount > 0 ? data.confirmCount / data.totalCount : null;
+    const regime = classifyRegime(data.peerResults, data.focusChg);
+    const peersWithCorrelation = data.peerResults.filter(peer => Number.isFinite(peer.corr));
+    const mostCoupled = strongestBy(peersWithCorrelation, p => Math.abs(p.corr), true);
+    const leastCoupled = strongestBy(peersWithCorrelation, p => Math.abs(p.corr), false);
+    const tightened = data.peerResults
+      .filter(p => Number.isFinite(p.corrDelta) && p.corrDelta > 0)
+      .sort((a, b) => b.corrDelta - a.corrDelta);
+    const loosened = data.peerResults
+      .filter(p => Number.isFinite(p.corrDelta) && p.corrDelta < 0)
+      .sort((a, b) => a.corrDelta - b.corrDelta);
+    const biggestTighten = tightened[0] || null;
+    const biggestLoosen = loosened[0] || null;
+
+    let movement = "UNCHANGED";
+    let movementColor = "var(--muted)";
+    if (Number.isFinite(avgDelta)) {
+      if (avgDelta > 0.035) {
+        movement = "TIGHTENING";
+        movementColor = "var(--green)";
+      } else if (avgDelta < -0.035) {
+        movement = "LOOSENING";
+        movementColor = "var(--cyan)";
+      }
+    }
+
+    const summary = [];
+    if (Number.isFinite(avgDelta)) {
+      const verb = avgDelta >= 0 ? "tightened" : "loosened";
+      summary.push(`Average absolute correlation ${verb} by ${Math.abs(avgDelta).toFixed(2)} over 24h.`);
+    }
+    if (Number.isFinite(confirmation)) {
+      summary.push(`${data.confirmCount}/${data.totalCount} peers confirm ${FOCUS}'s 24h direction.`);
+    }
+    if (mostCoupled && leastCoupled) {
+      summary.push(`${mostCoupled.symbol} is most coupled; ${leastCoupled.symbol} is least coupled.`);
+    }
+
+    return { currentAvg, previousAvg, avgDelta, confirmation, regime, mostCoupled, leastCoupled, biggestTighten, biggestLoosen, movement, movementColor, summary };
+  }
+
+  function renderStructurePanel(data) {
+    const s = describeStructure(data);
+    if (!s) {
+      structureBody.innerHTML = '<div class="history-empty">WAITING FOR MARKET DATA...</div>';
+      return;
+    }
+    const deltaText = Number.isFinite(s.avgDelta) ? `${s.avgDelta >= 0 ? "+" : ""}${s.avgDelta.toFixed(2)}` : "—";
+    const signedDelta = (n) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}`;
+    const coupledText = s.mostCoupled ? `$${s.mostCoupled.symbol} · ${Math.abs(s.mostCoupled.corr).toFixed(2)}` : "—";
+    const leastText = s.leastCoupled ? `$${s.leastCoupled.symbol} · ${Math.abs(s.leastCoupled.corr).toFixed(2)}` : "—";
+    const tightenText = s.biggestTighten && Number.isFinite(s.biggestTighten.corrDelta) ? `$${s.biggestTighten.symbol} · ${signedDelta(s.biggestTighten.corrDelta)}` : "—";
+    const loosenText = s.biggestLoosen && Number.isFinite(s.biggestLoosen.corrDelta) ? `$${s.biggestLoosen.symbol} · ${signedDelta(s.biggestLoosen.corrDelta)}` : "—";
+    structureTitle.textContent = `${FOCUS} STRUCTURE`;
+    structureBody.innerHTML = `
+      <div class="structure-grid">
+        <div class="structure-card">
+          <div class="structure-label">STATE</div>
+          <div class="structure-value" style="color:${s.regime.color}">${s.regime.label}</div>
+          <div class="structure-note">${s.movement}</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">AVG |CORR|</div>
+          <div class="structure-value">${Number.isFinite(s.currentAvg) ? s.currentAvg.toFixed(2) : "—"}</div>
+          <div class="structure-note" style="color:${s.movementColor}">${deltaText} vs 24h</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">CONFIRMATION</div>
+          <div class="structure-value">${pct(s.confirmation)}</div>
+          <div class="structure-note">${data.confirmCount}/${data.totalCount} peers aligned</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">${FOCUS} 24H</div>
+          <div class="structure-value" style="color:${data.focusChg >= 0 ? "var(--text)" : "var(--magenta)"}">${pct(data.focusChg, 1)}</div>
+          <div class="structure-note">${fmtPrice(data.focusLast)}</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">MOST COUPLED</div>
+          <div class="structure-value">${coupledText}</div>
+          <div class="structure-note">tracks ${FOCUS} most closely now</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">LEAST COUPLED</div>
+          <div class="structure-value">${leastText}</div>
+          <div class="structure-note">most independent now</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">TIGHTENED MOST</div>
+          <div class="structure-value">${tightenText}</div>
+          <div class="structure-note">largest 24h corr increase</div>
+        </div>
+        <div class="structure-card">
+          <div class="structure-label">LOOSENED MOST</div>
+          <div class="structure-value">${loosenText}</div>
+          <div class="structure-note">largest 24h corr decrease</div>
+        </div>
+        <div class="structure-card structure-wide">
+          <div class="structure-label">FACT</div>
+          <div class="structure-note">${s.summary.join(" ")}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  structureBtn.addEventListener("click", () => {
+    renderStructurePanel(lastComputedData);
+    structureModal.classList.remove("hidden");
+    structureBtn.classList.add("active");
+    structureModal.querySelector(".info-modal-inner").focus();
+  });
+  structureClose.addEventListener("click", () => {
+    structureModal.classList.add("hidden");
+    structureBtn.classList.remove("active");
+  });
+  structureModal.addEventListener("click", (e) => {
+    if (e.target === structureModal) {
+      structureModal.classList.add("hidden");
+      structureBtn.classList.remove("active");
+    }
+  });
+
+  viewToggle.addEventListener("click", () => {
+    viewMode = viewMode === "diversify" ? "radar" : "diversify";
+    try { localStorage.setItem("el5_view", viewMode); } catch {}
     syncSwitcher();
     renderView(lastComputedData);
   });
 
   /* ═══════════════════════════════════════════════════
      END ANTI-RADAR
-     ═══════════════════════════════════════════════════ */
-
-  /* ═══════════════════════════════════════════════════
-     HISTORICAL REPLAY
-     ─────────────────────────────────────────────────
-     Loads replay.json (pre-computed from spike CSVs),
-     steps through frames, renders each snapshot using
-     the same renderView pipeline.
-     ═══════════════════════════════════════════════════ */
-
-  let replayMode = false;
-  let replayData = null;       // { peers, frames }
-  let replayIndex = 0;
-  let replayPlaying = false;
-  let replayTimer = null;
-  let replaySpeed = 1;         // frames per tick
-  let replayIntervalMs = 250;  // base tick rate
-  let livePollTimer = null;    // saved live poll interval ID
-  let replayPrevFocus = null;  // focus coin to restore when replay exits
-
-  const replayBar = document.getElementById("replay-bar");
-  const replayBadge = document.getElementById("replay-badge");
-  const replayPlayBtn = document.getElementById("replay-play");
-  const replayScrub = document.getElementById("replay-scrub");
-  const replayTsEl = document.getElementById("replay-ts");
-  const replayExitBtn = document.getElementById("replay-exit");
-  const replayEnterBtn = document.getElementById("replay-enter-btn");
-  const speedBtns = document.querySelectorAll(".speed-btn");
-
-  async function loadReplayData() {
-    // Try CSV-derived replay.json first
-    try {
-      const r = await fetch("/data/replay.json");
-      if (r.ok) {
-        const data = await r.json();
-        if (data.frames && data.frames.length > 0) return data;
-      }
-    } catch (e) {
-      console.warn("replay.json not available:", e.message);
-    }
-
-    // Fallback: fetch last 7 days from Coinbase and build frames
-    console.log("Falling back to Coinbase API for replay data...");
-    setStatus("fetching", "LOADING REPLAY...");
-
-    const hours = 168;
-    const granularity = 3600;
-    const seriesByToken = {};
-    for (const sym of [FOCUS, ...PEERS]) {
-      try {
-        const candles = await fetchCandles(sym);
-        if (candles && candles.length >= 24) seriesByToken[sym] = candles;
-      } catch (e) {
-        console.warn(`replay fetch failed for ${sym}:`, e.message);
-      }
-      await new Promise(r => setTimeout(r, 120));
-    }
-
-    const focusSeries = seriesByToken[FOCUS];
-    if (!focusSeries || focusSeries.length < 48) return null;
-
-    // Build frames from available data — step every 4 hours
-    const frames = [];
-    const focusRets = logReturns(focusSeries);
-    const focusRetMap = new Map(focusRets.map(p => [p.t, p.r]));
-
-    for (let idx = 48; idx < focusSeries.length; idx += 4) {
-      const ts = focusSeries[idx].t;
-      const btcPrice = focusSeries[idx].close;
-
-      // Compute correlations using data up to this point
-      const windowStart = Math.max(0, idx - 168);
-      const focusWindow = focusSeries.slice(windowStart, idx + 1);
-      const focusWinRets = logReturns(focusWindow);
-
-      const corrs = [];
-      const biases = [];
-      const vols = [];
-
-      for (const sym of PEERS) {
-        const series = seriesByToken[sym];
-        if (!series) {
-          corrs.push(null); biases.push(null); vols.push(null);
-          continue;
-        }
-
-        // Find matching window
-        const peerWindow = series.filter(s => s.t >= focusWindow[0].t && s.t <= focusWindow[focusWindow.length - 1].t);
-        const peerRets = logReturns(peerWindow);
-        const [xs, ys] = alignReturns(focusWinRets, peerRets);
-        const c = pearson(xs, ys);
-        corrs.push(c !== null ? Math.round(c * 10000) / 10000 : null);
-
-        // 24h bias
-        const peerIdx = series.findIndex(s => s.t === ts);
-        if (peerIdx >= 24) {
-          const prev = series[peerIdx - 24].close;
-          const curr = series[peerIdx].close;
-          biases.push(prev > 0 ? Math.round(((curr - prev) / prev) * 100000) / 100000 : null);
-        } else {
-          biases.push(null);
-        }
-
-        // Vol
-        const v = computeVolatility(peerWindow);
-        vols.push(v);
-      }
-
-      const isoTs = new Date(ts * 1000).toISOString().replace(/\.\d+Z$/, "Z");
-      frames.push({
-        t: isoTs,
-        btc: Math.round(btcPrice * 100) / 100,
-        corr: corrs,
-        bias: biases,
-        vol: vols,
-      });
-    }
-
-    return { peers: PEERS.slice(), frames };
-  }
-
-  function replayFrameToData(frame) {
-    // Convert a replay frame into the format renderView expects
-    // Compute BTC vol from surrounding replay frames for volRatio
-    let btcVol = null;
-    if (replayData && replayIndex >= 42) {
-      // Use trailing 42 frames (~168h at 4h spacing) of BTC prices for vol
-      const btcRets = [];
-      for (let j = replayIndex - 41; j <= replayIndex; j++) {
-        const prev = replayData.frames[j - 1].btc;
-        const curr = replayData.frames[j].btc;
-        if (prev > 0 && curr > 0) btcRets.push(Math.log(curr / prev));
-      }
-      if (btcRets.length >= 10) {
-        const mean = btcRets.reduce((s, v) => s + v, 0) / btcRets.length;
-        const variance = btcRets.reduce((s, v) => s + (v - mean) ** 2, 0) / btcRets.length;
-        btcVol = Math.sqrt(variance);
-      }
-    }
-
-    const peerResults = replayData.peers.map((sym, i) => {
-      const vol = frame.vol[i];
-      let volRatio = null;
-      if (vol !== null && btcVol !== null && btcVol > 0) {
-        volRatio = vol / btcVol;
-      }
-      return {
-        symbol: sym,
-        corr: frame.corr[i],
-        bias24h: frame.bias[i],
-        vol,
-        volRatio,
-      };
-    });
-
-    // Compute BTC 24h bias from replay frames (look back ~6 frames = 24h at 4h spacing)
-    let btcBias = null;
-    const lookback = 6;
-    if (replayData && replayIndex >= lookback) {
-      const prevBtc = replayData.frames[replayIndex - lookback].btc;
-      if (prevBtc > 0) btcBias = (frame.btc - prevBtc) / prevBtc;
-    }
-    const focusUp = btcBias !== null ? btcBias >= 0 : true;
-
-    let confirmCount = 0, totalCount = 0;
-    for (const p of peerResults) {
-      if (p.corr !== null && p.bias24h !== null) {
-        totalCount++;
-        const peerUp = p.bias24h >= 0;
-        const inverse = p.corr < 0;
-        const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
-        if (aligned) confirmCount++;
-      }
-    }
-
-    return {
-      peerResults,
-      focusLast: frame.btc,
-      focusChg: btcBias,
-      focusUp,
-      confirmCount,
-      totalCount,
-    };
-  }
-
-  function renderReplayFrame() {
-    if (!replayData || !replayData.frames[replayIndex]) return;
-    const frame = replayData.frames[replayIndex];
-    const data = replayFrameToData(frame);
-
-    // Update the cached data so the diversify toggle works during replay
-    lastComputedData = data;
-    renderView(data);
-
-    // Update scrub bar and timestamp
-    replayScrub.value = replayIndex;
-    const ts = frame.t.replace("T", " ").replace("Z", " UTC");
-    replayTsEl.textContent = ts;
-  }
-
-  function replayTick() {
-    if (!replayPlaying || !replayData) return;
-    replayIndex += replaySpeed;
-    if (replayIndex >= replayData.frames.length) {
-      replayIndex = replayData.frames.length - 1;
-      pauseReplay();
-      return;
-    }
-    renderReplayFrame();
-  }
-
-  function playReplay() {
-    replayPlaying = true;
-    replayPlayBtn.textContent = "⏸";
-    replayPlayBtn.classList.add("active");
-    replayTimer = setInterval(replayTick, replayIntervalMs);
-  }
-
-  function pauseReplay() {
-    replayPlaying = false;
-    replayPlayBtn.textContent = "▶";
-    replayPlayBtn.classList.remove("active");
-    if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
-  }
-
-  async function enterReplayMode() {
-    if (replayMode) return;
-    setStatus("fetching", "LOADING REPLAY...");
-    replayEnterBtn.textContent = "▌ LOADING...";
-
-    // Replay frames are BTC-relative — pin focus to BTC for the duration
-    // (incl. the loadReplayData fallback fetch) without clobbering the user's
-    // saved selection, and leave the overview.
-    replayPrevFocus = FOCUS;
-    if (viewMode === "overview") viewMode = "radar";
-    FOCUS = "BTC";
-    PEERS = UNIVERSE.filter(s => s !== "BTC");
-
-    replayData = await loadReplayData();
-    if (!replayData || replayData.frames.length === 0) {
-      setStatus("error", "NO REPLAY DATA");
-      replayEnterBtn.textContent = "▌ REPLAY";
-      // Restore focus — replay didn't actually start.
-      applyFocus(replayPrevFocus); replayPrevFocus = null;
-      return;
-    }
-
-    replayMode = true;
-    replayIndex = 0;
-    syncSwitcher();
-
-    // Pause live polling
-    // (The live poll is set up via setInterval in the main flow — we'll track it)
-
-    // Show replay UI
-    replayBar.classList.add("active");
-    replayBadge.classList.add("active");
-    replayEnterBtn.style.display = "none";
-
-    // Configure scrub bar
-    replayScrub.max = replayData.frames.length - 1;
-    replayScrub.value = 0;
-
-    // Render first frame
-    renderReplayFrame();
-    setStatus("", "REPLAY");
-  }
-
-  function exitReplayMode() {
-    replayMode = false;
-    pauseReplay();
-    replayData = null;
-
-    replayBar.classList.remove("active");
-    replayBadge.classList.remove("active");
-    replayEnterBtn.style.display = "";
-    replayEnterBtn.textContent = "▌ REPLAY";
-
-    // Restore the focus coin the user was on before replay.
-    if (replayPrevFocus) { applyFocus(replayPrevFocus); replayPrevFocus = null; }
-    syncSwitcher();
-
-    // Trigger a live refresh
-    loadAndRender();
-  }
-
-  // Event listeners
-  replayEnterBtn.addEventListener("click", enterReplayMode);
-  replayExitBtn.addEventListener("click", exitReplayMode);
-
-  replayPlayBtn.addEventListener("click", () => {
-    if (replayPlaying) pauseReplay();
-    else playReplay();
-  });
-
-  replayScrub.addEventListener("input", () => {
-    pauseReplay();
-    replayIndex = parseInt(replayScrub.value, 10);
-    renderReplayFrame();
-  });
-
-  speedBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      speedBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      replaySpeed = parseInt(btn.dataset.speed, 10);
-      // If playing, restart timer with new speed
-      if (replayPlaying) {
-        clearInterval(replayTimer);
-        replayTimer = setInterval(replayTick, replayIntervalMs);
-      }
-    });
-  });
-
-  // Keyboard shortcuts for replay
-  document.addEventListener("keydown", (e) => {
-    if (!replayMode) return;
-    if (e.key === " " || e.key === "k") {
-      e.preventDefault();
-      if (replayPlaying) pauseReplay();
-      else playReplay();
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      pauseReplay();
-      replayIndex = Math.min(replayIndex + 1, replayData.frames.length - 1);
-      renderReplayFrame();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      pauseReplay();
-      replayIndex = Math.max(replayIndex - 1, 0);
-      renderReplayFrame();
-    } else if (e.key === "Escape") {
-      exitReplayMode();
-    }
-  });
-
-  /* ═══════════════════════════════════════════════════
-     END REPLAY
      ═══════════════════════════════════════════════════ */
 
   /* ═══════════════════════════════════════════════════
@@ -2230,16 +2569,35 @@ footer a:hover { color: var(--muted); }
      ═══════════════════════════════════════════════════ */
 
   const snapshotBtn = document.getElementById("snapshot-btn");
+  let snapshotInFlight = false;
+
+  function finishSnapshot(result) {
+    snapshotInFlight = false;
+    snapshotBtn.disabled = false;
+    snapshotBtn.removeAttribute("aria-busy");
+    snapshotBtn.textContent = result === "shared" ? "✓" : result === "cancelled" ? "↗" : "!";
+    snapshotBtn.classList.toggle("done", result === "shared");
+    setTimeout(() => {
+      snapshotBtn.textContent = "↗";
+      snapshotBtn.classList.remove("done");
+    }, result === "shared" ? 1400 : 2000);
+  }
+
+  window.el5SnapshotResult = finishSnapshot;
 
   function exportRadarPNG() {
+    if (snapshotInFlight) return;
+    snapshotInFlight = true;
+    snapshotBtn.disabled = true;
+    snapshotBtn.setAttribute("aria-busy", "true");
     const svgEl = document.getElementById("radar");
     const serializer = new XMLSerializer();
     let svgStr = serializer.serializeToString(svgEl);
 
     // Inject inline styles for text elements (they rely on CSS that won't be in the exported SVG)
     const styleBlock = `<style>
-      text { font-family: "JetBrains Mono", monospace; }
-      .corr-label { fill: #3a3a55; font-size: 9px; font-family: "JetBrains Mono", monospace; }
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      .corr-label { fill: #3a3a55; font-size: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     </style>`;
     svgStr = svgStr.replace(/<svg([^>]*)>/, `<svg$1>${styleBlock}`);
 
@@ -2269,7 +2627,7 @@ footer a:hover { color: var(--muted); }
       ctx.fillRect(0, 800, canvasW, 40);
 
       // Watermark text
-      ctx.font = "500 10px 'JetBrains Mono', monospace";
+      ctx.font = "500 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
       ctx.letterSpacing = "0.12em";
 
       // Left: el5.io branding
@@ -2286,28 +2644,34 @@ footer a:hover { color: var(--muted); }
 
       // Trigger download
       canvas.toBlob((pngBlob) => {
-        const a = document.createElement("a");
+        if (!pngBlob) { finishSnapshot("error"); return; }
         const dateStr = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        a.download = `el5-radar-${dateStr}.png`;
-        a.href = URL.createObjectURL(pngBlob);
-        a.click();
-        URL.revokeObjectURL(a.href);
+        const filename = `el5-radar-${dateStr}.png`;
 
-        // Flash feedback on button
-        snapshotBtn.textContent = "▌ SAVED";
-        snapshotBtn.classList.add("done");
-        setTimeout(() => {
-          snapshotBtn.textContent = "▌ SNAP";
-          snapshotBtn.classList.remove("done");
-        }, 1500);
+        if (window.webkit?.messageHandlers?.el5Snapshot) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            window.webkit.messageHandlers.el5Snapshot.postMessage({
+              filename,
+              dataURL: reader.result
+            });
+          };
+          reader.readAsDataURL(pngBlob);
+        } else {
+          const a = document.createElement("a");
+          a.download = filename;
+          a.href = URL.createObjectURL(pngBlob);
+          a.click();
+          URL.revokeObjectURL(a.href);
+          finishSnapshot("shared");
+        }
       }, "image/png");
     };
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
       console.error("Snapshot: SVG render failed");
-      snapshotBtn.textContent = "▌ ERROR";
-      setTimeout(() => { snapshotBtn.textContent = "▌ SNAP"; }, 2000);
+      finishSnapshot("error");
     };
 
     // Flash to indicate capture
@@ -2323,10 +2687,21 @@ footer a:hover { color: var(--muted); }
   const infoModal = document.getElementById("info-modal");
   const infoClose = document.getElementById("info-close");
 
-  infoBtn.addEventListener("click", () => infoModal.classList.remove("hidden"));
+  infoBtn.addEventListener("click", () => {
+    infoModal.classList.remove("hidden");
+    infoModal.querySelector(".info-modal-inner").focus();
+  });
   infoClose.addEventListener("click", () => infoModal.classList.add("hidden"));
   infoModal.addEventListener("click", (e) => {
     if (e.target === infoModal) infoModal.classList.add("hidden");
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    assetModal.classList.add("hidden");
+    structureModal.classList.add("hidden");
+    infoModal.classList.add("hidden");
+    historyPanel.classList.remove("open");
+    structureBtn.classList.remove("active");
   });
 
   /* ═══════════════════════════════════════════════════
@@ -2354,9 +2729,8 @@ footer a:hover { color: var(--muted); }
     return out;
   }
 
-  function computeChannel(series) {
+  function computeChannel(series, livePrice = null) {
     // series: [{t, close, high?, low?}] sorted ascending
-    // We only have close from Coinbase candles, so use close for high/low proxy
     if (!series || series.length < 30) return null;
 
     const closes = series.map(s => s.close);
@@ -2366,11 +2740,22 @@ footer a:hover { color: var(--muted); }
     // EMA of closes
     const emaLine = ema(closes, emaPeriod);
 
-    // ATR approximation from closes (since we only have close)
-    // Use absolute hourly changes as volatility proxy
-    const ranges = [0];
-    for (let i = 1; i < closes.length; i++) {
-      ranges.push(Math.abs(closes[i] - closes[i - 1]));
+    // True range when high/low are available; otherwise fall back to close-to-close range.
+    const ranges = [];
+    for (let i = 0; i < series.length; i++) {
+      const bar = series[i];
+      const prevClose = i > 0 ? series[i - 1].close : bar.close;
+      if (Number.isFinite(bar.high) && Number.isFinite(bar.low)) {
+        ranges.push(Math.max(
+          bar.high - bar.low,
+          Math.abs(bar.high - prevClose),
+          Math.abs(bar.low - prevClose)
+        ));
+      } else if (i > 0) {
+        ranges.push(Math.abs(bar.close - prevClose));
+      } else {
+        ranges.push(0);
+      }
     }
     const atrLine = ema(ranges, atrPeriod);
 
@@ -2383,10 +2768,12 @@ footer a:hover { color: var(--muted); }
     const above   = { lower: current.upper, upper: current.upper + mult * atr };
     const below   = { lower: current.lower - mult * atr, upper: current.lower };
 
-    // Last 24h of data for the polyline
-    const recent = series.slice(-24);
+    // Last 24h of data for the polyline.
+    const lastT = series[last].t;
+    const recent = series.filter(bar => lastT - bar.t <= 24 * 3600);
 
-    return { current, above, below, recent, price: closes[last], mid, atr };
+    const priceIsLive = Number.isFinite(livePrice);
+    return { current, above, below, recent, price: priceIsLive ? livePrice : closes[last], priceIsLive, mid, atr };
   }
 
   function renderChannel(channelData) {
@@ -2395,11 +2782,18 @@ footer a:hover { color: var(--muted); }
       return;
     }
 
-    const { current, above, below, recent, price } = channelData;
-    const W = 800, H = 140;
-    const PX_L = 10, PX_R = 80, PY_T = 8, PY_B = 16, GAP = 4;
+    const { current, above, below, recent, price, priceIsLive } = channelData;
+    const compact = window.matchMedia?.("(max-width: 600px)").matches === true;
+    const W = compact ? 390 : 800;
+    const H = compact ? 166 : 140;
+    const PX_L = compact ? 8 : 10;
+    const PX_R = compact ? 86 : 80;
+    const PY_T = compact ? 8 : 8;
+    const PY_B = compact ? 20 : 16;
+    const GAP = compact ? 5 : 4;
     const bandH = (H - PY_T - PY_B - 2 * GAP) / 3;
     const bandW = W - PX_L - PX_R;
+    const sideX = PX_L + bandW + (compact ? 10 : 6);
     const yAbove = PY_T;
     const yCurrent = PY_T + bandH + GAP;
     const yBelow = PY_T + 2 * (bandH + GAP);
@@ -2408,6 +2802,12 @@ footer a:hover { color: var(--muted); }
       if (hi === lo) return bandTopY + bandH / 2;
       const t = (p - lo) / (hi - lo);
       return bandTopY + bandH * (1 - Math.max(0, Math.min(1, t)));
+    }
+
+    function priceToChannelY(p) {
+      if (p > current.upper) return priceToY(p, above.lower, above.upper, yAbove);
+      if (p < current.lower) return priceToY(p, below.lower, below.upper, yBelow);
+      return priceToY(p, current.lower, current.upper, yCurrent);
     }
 
     const fmt = (n) => Number.isFinite(n) ? "$" + n.toLocaleString(undefined, { maximumFractionDigits: 0 }) : "—";
@@ -2419,26 +2819,17 @@ footer a:hover { color: var(--muted); }
       const dt = Math.max(1, t1 - t0);
       for (const bar of recent) {
         const x = PX_L + bandW * ((bar.t - t0) / dt);
-        const y = priceToY(bar.close, current.lower, current.upper, yCurrent);
+        const y = priceToChannelY(bar.close);
         pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
       }
     }
 
     // Current price dot position — floats into adjacent band on breakout
-    const dotX = PX_L + bandW;
-    let dotY, dotBand = "current";
-    if (price > current.upper) {
-      dotY = priceToY(price, above.lower, above.upper, yAbove);
-      dotBand = "above";
-    } else if (price < current.lower) {
-      dotY = priceToY(price, below.lower, below.upper, yBelow);
-      dotBand = "below";
-    } else {
-      dotY = priceToY(price, current.lower, current.upper, yCurrent);
-    }
+    const dotX = PX_L + bandW - (compact ? 3 : 0);
+    const dotY = priceToChannelY(price);
 
     const svg = [
-      `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`,
+      `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">`,
       `<defs>`,
       `  <linearGradient id="ch-grad-up" x1="0" y1="0" x2="0" y2="1">`,
       `    <stop offset="0%" stop-color="#39ff14" stop-opacity="0.25"/>`,
@@ -2451,23 +2842,23 @@ footer a:hover { color: var(--muted); }
       `</defs>`,
       // Upper band
       `<rect class="ch-band" x="${PX_L}" y="${yAbove}" width="${bandW}" height="${bandH}" rx="3" fill="url(#ch-grad-up)"/>`,
-      `<text class="ch-label" x="${PX_L + bandW + 6}" y="${yAbove + 12}">UPPER</text>`,
-      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yAbove + 24}">${fmt(above.upper)}</text>`,
-      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yAbove + bandH - 2}">${fmt(above.lower)}</text>`,
       // Current band
       `<rect class="ch-band" x="${PX_L}" y="${yCurrent}" width="${bandW}" height="${bandH}" rx="3" fill="#13132a"/>`,
-      `<text class="ch-label" x="${PX_L + bandW + 6}" y="${yCurrent + 12}">CURRENT</text>`,
-      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yCurrent + 24}">${fmt(current.upper)}</text>`,
-      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yCurrent + bandH - 2}">${fmt(current.lower)}</text>`,
       // Lower band
       `<rect class="ch-band" x="${PX_L}" y="${yBelow}" width="${bandW}" height="${bandH}" rx="3" fill="url(#ch-grad-dn)"/>`,
-      `<text class="ch-label" x="${PX_L + bandW + 6}" y="${yBelow + 12}">LOWER</text>`,
-      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yBelow + 24}">${fmt(below.upper)}</text>`,
-      `<text class="ch-price" x="${PX_L + bandW + 6}" y="${yBelow + bandH - 2}">${fmt(below.lower)}</text>`,
+      // Four unique channel boundaries
+      `<text class="ch-price" x="${sideX}" y="${yAbove + 10}">${fmt(above.upper)}</text>`,
+      `<text class="ch-price" x="${sideX}" y="${yCurrent + 3}">${fmt(current.upper)}</text>`,
+      `<text class="ch-price" x="${sideX}" y="${yBelow + 3}">${fmt(current.lower)}</text>`,
+      `<text class="ch-price" x="${sideX}" y="${yBelow + bandH}">${fmt(below.lower)}</text>`,
       // Price polyline
       pts.length ? `<polyline class="ch-polyline" points="${pts.join(" ")}"/>` : "",
+      `<text class="ch-label" x="${PX_L + 7}" y="${yAbove + 13}">UPPER</text>`,
+      `<text class="ch-label" x="${PX_L + 7}" y="${yCurrent + 13}">CHANNEL</text>`,
+      `<text class="ch-label" x="${PX_L + 7}" y="${yBelow + 13}">LOWER</text>`,
       // Price dot
-      `<circle class="ch-dot" cx="${dotX.toFixed(1)}" cy="${dotY.toFixed(1)}" r="4"/>`,
+      `<circle class="ch-dot" cx="${dotX.toFixed(1)}" cy="${dotY.toFixed(1)}" r="${compact ? 5.5 : 4}"/>`,
+      `<text class="ch-live" x="${W - 6}" y="${Math.max(12, Math.min(H - 9, dotY - 7)).toFixed(1)}" text-anchor="end">${priceIsLive ? "LIVE" : "CLOSE"} ${fmt(price)}</text>`,
       // Time axis
       `<text class="ch-time" x="${PX_L}" y="${H - 2}">T-24H</text>`,
       `<text class="ch-time" x="${PX_L + bandW}" y="${H - 2}" text-anchor="end">NOW</text>`,
@@ -2481,153 +2872,247 @@ footer a:hover { color: var(--muted); }
      END CHANNEL
      ═══════════════════════════════════════════════════ */
 
-  // Last full universe series map — lets focus switches + the overview
-  // recompute from cached data instantly without waiting on a refetch.
-  let lastSeries = null;
-
-  // Compute the radar dataset for a given focus coin against the rest of the
-  // universe. runAlerts is only true on live polls of the *active* focus, so
-  // switching context or rendering the overview never fires duplicate alerts.
-  function computeFocusData(seriesByToken, focusSym, runAlerts) {
-    const focusSeries = seriesByToken[focusSym];
-    if (!focusSeries) return null;
-
-    const focusRets = logReturns(focusSeries);
-    const focusLast = focusSeries[focusSeries.length - 1].close;
+  function computeFocusData(seriesByToken, focusSymbol, runAlerts) {
+    const focusSeries = seriesByToken[focusSymbol];
+    if (!focusSeries || focusSeries.length < 48) return null;
+    const peers = UNIVERSE.filter(symbol => symbol !== focusSymbol);
+    const latestT = focusSeries[focusSeries.length - 1].t;
+    const previousT = latestT - STRUCTURE_LOOKBACK_HOURS * 3600;
+    const focusWindow = trailingWindow(focusSeries, HOURS, latestT);
+    const focusRets = logReturns(focusWindow);
+    const quote = lastQuotes[focusSymbol];
+    const priceIsLive = Number.isFinite(quote);
+    const focusLast = priceIsLive ? quote : focusSeries[focusSeries.length - 1].close;
     const focusChg = changePct24h(focusSeries);
-    const focusVol = computeVolatility(focusSeries);
-    const focusUp = focusChg !== null && focusChg >= 0;
-    const peers = UNIVERSE.filter(s => s !== focusSym);
-
-    const corrHistory = runAlerts ? loadCorrHistory() : null;
-    let confirmCount = 0, totalCount = 0;
+    const focusVol = computeVolatility(focusWindow);
+    const focusUp = Number.isFinite(focusChg) && focusChg >= 0;
+    const corrHistory = runAlerts ? loadCorrHistory(focusSymbol) : null;
+    let confirmCount = 0;
+    let totalCount = 0;
+    let availableCount = 0;
     const peerResults = [];
 
-    peers.forEach((sym) => {
-      const series = seriesByToken[sym];
-      let corr = null, bias = null, vol = null, volRatio = null;
-      if (series) {
-        const peerRets = logReturns(series);
-        const [xs, ys] = alignReturns(focusRets, peerRets);
+    peers.forEach(symbol => {
+      const series = seriesByToken[symbol];
+      let corr = null, corrPrev = null, corrDelta = null, bias24h = null, vol = null, volRatio = null;
+      if (series && series.length >= 48 && series[series.length - 1].t === latestT) {
+        const peerWindow = trailingWindow(series, HOURS, latestT);
+        const [xs, ys] = alignReturns(focusRets, logReturns(peerWindow));
         corr = pearson(xs, ys);
-        bias = changePct24h(series);
-        vol = computeVolatility(series);
-        if (vol !== null && focusVol !== null && focusVol > 0) {
-          volRatio = vol / focusVol;
-        }
-        if (corr !== null && bias !== null) {
+        corrPrev = computeCorrForWindow(focusSeries, series, previousT);
+        if (Number.isFinite(corr) && Number.isFinite(corrPrev)) corrDelta = Math.abs(corr) - Math.abs(corrPrev);
+        bias24h = changePct24h(series);
+        vol = computeVolatility(peerWindow);
+        if (Number.isFinite(vol) && Number.isFinite(focusVol) && focusVol > 0) volRatio = vol / focusVol;
+
+        if (Number.isFinite(corr) && Number.isFinite(bias24h)) {
+          availableCount++;
           totalCount++;
-          const peerUp = bias >= 0;
+          const peerUp = bias24h >= 0;
           const inverse = corr < 0;
-          const aligned = inverse ? (peerUp !== focusUp) : (peerUp === focusUp);
-          if (aligned) confirmCount++;
+          if (inverse ? peerUp !== focusUp : peerUp === focusUp) confirmCount++;
         }
-        // ── Alert engine: record + check (active focus, live poll only) ──
-        if (runAlerts && corr !== null) {
-          checkDecorrelation(sym, corr, corrHistory);
-          pushCorr(corrHistory, sym, corr);
+
+        if (runAlerts && Number.isFinite(corr)) {
+          const observations = (corrHistory[symbol] || [])
+            .filter(entry => Number.isFinite(entry.candleT) && latestT - entry.candleT <= 72 * 3600)
+            .sort((a, b) => a.candleT - b.candleT);
+          corrHistory[symbol] = observations;
+          const lastObservation = observations[observations.length - 1];
+          if (!lastObservation || lastObservation.candleT !== latestT) {
+            const baselineIsContinuous = !lastObservation || latestT - lastObservation.candleT <= 2 * 3600;
+            if (baselineIsContinuous) checkDecorrelation(symbol, corr, corrHistory);
+            else corrHistory[symbol] = [];
+            pushCorr(corrHistory, symbol, corr, latestT);
+          }
         }
       }
-      peerResults.push({ symbol: sym, corr, bias24h: bias, vol, volRatio });
+      peerResults.push({ symbol, corr, corrPrev, corrDelta, bias24h, vol, volRatio });
     });
 
-    if (runAlerts) saveCorrHistory(corrHistory);
-
-    return { peerResults, focusLast, focusChg, focusUp, confirmCount, totalCount, focusSeries };
+    if (runAlerts) saveCorrHistory(corrHistory, focusSymbol);
+    return {
+      peerResults,
+      focusLast,
+      priceIsLive,
+      focusChg,
+      focusUp,
+      confirmCount,
+      totalCount,
+      availableCount,
+      requestedCount: peers.length,
+      latestT,
+      focusSeries,
+    };
   }
 
-  // Recompute the active focus from cached series and re-render.
   function recomputeAndRender(runAlerts) {
-    if (!lastSeries) return;
+    if (!lastSeries) return null;
     const data = computeFocusData(lastSeries, FOCUS, runAlerts);
-    if (!data) { setStatus("error", `NO ${FOCUS} DATA`); return; }
+    if (!data) return null;
     lastComputedData = data;
     renderView(data);
-    if (viewMode !== "overview") {
-      renderChannel(computeChannel(data.focusSeries));
+    if (!structureModal.classList.contains("hidden")) renderStructurePanel(data);
+    if (viewMode !== "overview") renderChannel(computeChannel(data.focusSeries, data.priceIsLive ? data.focusLast : null));
+    return data;
+  }
+
+  function loadSeriesCache() {
+    try {
+      const cache = JSON.parse(localStorage.getItem(CACHE_KEY));
+      if (!cache || cache.version !== 2 || !Number.isFinite(cache.savedAt) || !cache.seriesByToken) return null;
+      const seriesByToken = {};
+      for (const symbol of UNIVERSE) {
+        const series = cache.seriesByToken[symbol];
+        if (!Array.isArray(series)) continue;
+        const valid = series.filter(bar => bar && Number.isFinite(bar.t) && Number.isFinite(bar.close) && bar.close > 0);
+        if (valid.length >= 48) seriesByToken[symbol] = valid.sort((a, b) => a.t - b.t);
+      }
+      return Object.keys(seriesByToken).length ? { savedAt: cache.savedAt, seriesByToken } : null;
+    } catch { return null; }
+  }
+
+  function saveSeriesCache(seriesByToken) {
+    try {
+      lastCacheSavedAt = Date.now();
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ version: 2, savedAt: lastCacheSavedAt, seriesByToken }));
+    } catch {}
+  }
+
+  function formatAge(milliseconds) {
+    const minutes = Math.max(0, Math.round(milliseconds / 60000));
+    if (minutes < 2) return "JUST NOW";
+    if (minutes < 60) return `${minutes}M AGO`;
+    return `${Math.round(minutes / 60)}H AGO`;
+  }
+
+  async function fetchUniverse(signal) {
+    const seriesByToken = {};
+    const failures = [];
+    let cursor = 0;
+    const workers = Array.from({ length: 3 }, async () => {
+      while (cursor < UNIVERSE.length) {
+        const symbol = UNIVERSE[cursor++];
+        try {
+          const candles = await fetchCandles(symbol, signal);
+          if (candles && candles.length >= 48) seriesByToken[symbol] = candles;
+          else failures.push(symbol);
+        } catch (error) {
+          if (signal.aborted) throw error;
+          console.warn(`fetch failed for ${symbol}:`, error.message);
+          failures.push(symbol);
+        }
+      }
+    });
+    await Promise.all(workers);
+    const quotes = {};
+    const quoteResults = await Promise.allSettled(SWITCHABLE.map(symbol => fetchQuote(symbol, signal)));
+    quoteResults.forEach((result, index) => {
+      if (result.status === "fulfilled" && Number.isFinite(result.value)) quotes[SWITCHABLE[index]] = result.value;
+    });
+    return { seriesByToken, failures, quotes };
+  }
+
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer);
+    if (!document.hidden) refreshTimer = setTimeout(() => loadAndRender(false), POLL_MS);
+  }
+
+  let refreshGeneration = 0;
+  async function loadAndRender(force = false) {
+    if (document.hidden && !force) { scheduleRefresh(); return; }
+    if (refreshInFlight && !force) return;
+    if (refreshController) refreshController.abort();
+    const generation = ++refreshGeneration;
+    refreshController = new AbortController();
+    refreshInFlight = true;
+    setStatus("fetching", "UPDATING");
+    if (!lastSeries) loading.classList.remove("hidden");
+
+    try {
+      const { seriesByToken, failures, quotes } = await fetchUniverse(refreshController.signal);
+      if (generation !== refreshGeneration) return;
+      const freshCount = Object.keys(seriesByToken).length;
+      if (freshCount === 0) throw new Error("No fresh candle data");
+      if (!seriesByToken[FOCUS]) throw new Error(`No fresh ${FOCUS} candles available`);
+      lastSeries = seriesByToken;
+      lastQuotes = quotes;
+      if (failures.length === 0) saveSeriesCache(seriesByToken);
+      const data = recomputeAndRender(true);
+      if (!data) throw new Error(`Not enough ${FOCUS} candles`);
+
+      loading.classList.add("hidden");
+      if (failures.length > 0) {
+        setStatus("error", `${freshCount}/${UNIVERSE.length} PARTIAL`);
+        showDataNotice("partial", `PARTIAL DATA · ${failures.join(", ")} EXCLUDED · TAP TO RETRY`);
+      } else {
+        setStatus("", `${UNIVERSE.length}/${UNIVERSE.length} FRESH`);
+        hideDataNotice();
+      }
+    } catch (error) {
+      if (generation !== refreshGeneration || error.name === "AbortError") return;
+      console.error(error);
+      const cache = lastSeries ? null : loadSeriesCache();
+      if (cache) lastSeries = cache.seriesByToken;
+      const data = recomputeAndRender(false);
+      if (data) {
+        loading.classList.add("hidden");
+        const cachedAt = cache?.savedAt || lastCacheSavedAt || Date.now() - CACHE_MAX_AGE_MS;
+        setStatus("error", "STALE");
+        showDataNotice("error", `LIVE REFRESH FAILED · SHOWING DATA FROM ${formatAge(Date.now() - cachedAt)} · TAP TO RETRY`);
+      } else {
+        setStatus("error", "OFFLINE");
+        loading.textContent = "MARKET DATA UNAVAILABLE";
+        loading.classList.remove("hidden");
+        showDataNotice("error", "NO MARKET DATA AVAILABLE · CHECK CONNECTION · TAP TO RETRY");
+      }
+    } finally {
+      if (generation === refreshGeneration) {
+        refreshInFlight = false;
+        scheduleRefresh();
+      }
     }
   }
 
-  /* ═══════════════════════════════════════════════════
-     FOCUS SWITCHER
-     ═══════════════════════════════════════════════════ */
-
-  const switcher = document.getElementById("focus-switcher");
-  const switcherBtns = switcher.querySelectorAll(".fsw-btn");
-
-  function syncSwitcher() {
-    switcherBtns.forEach(btn => {
-      const coin = btn.dataset.coin;
-      const active = coin === "ALL" ? viewMode === "overview"
-                                    : (viewMode !== "overview" && coin === FOCUS);
-      btn.classList.toggle("active", active);
-      btn.disabled = replayMode;
-    });
-  }
-
-  // Pick a focus coin (from switcher or overview hex) and show its radar.
-  function selectFocus(sym) {
-    if (replayMode) return;
-    applyFocus(sym);
-    if (viewMode === "overview") viewMode = "radar";
-    syncSwitcher();
-    if (lastSeries) recomputeAndRender(false);
-    else loadAndRender();
-  }
-
-  function showOverview() {
-    if (replayMode) return;
-    viewMode = "overview";
-    viewToggle.classList.remove("active");
-    viewToggle.textContent = "▌ DIVERSIFY";
-    syncSwitcher();
-    renderView(lastComputedData);
-  }
-
-  switcherBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const coin = btn.dataset.coin;
-      if (coin === "ALL") showOverview();
-      else selectFocus(coin);
-    });
-  });
-
-  async function loadAndRender() {
-    // Skip live updates while in replay mode
-    if (replayMode) return;
-    setStatus("fetching", "FETCHING...");
-    try {
-      const seriesByToken = {};
-      for (const sym of UNIVERSE) {
-        try {
-          const candles = await fetchCandles(sym);
-          if (candles && candles.length >= 24) seriesByToken[sym] = candles;
-        } catch (e) {
-          console.warn(`fetch failed for ${sym}:`, e.message);
-        }
-        await new Promise(r => setTimeout(r, 120));
-      }
-      lastSeries = seriesByToken;
-
-      if (!seriesByToken[FOCUS]) throw new Error(`No ${FOCUS} data`);
-
-      recomputeAndRender(true);
-
+  const cached = loadSeriesCache();
+  if (cached) {
+    lastSeries = cached.seriesByToken;
+    lastCacheSavedAt = cached.savedAt;
+    const data = recomputeAndRender(false);
+    if (data) {
       loading.classList.add("hidden");
-      const stamp = new Date().toISOString().substring(11, 19);
-      setStatus("", `OK · ${stamp}Z`);
-    } catch (e) {
-      console.error(e);
-      setStatus("error", "ERR · RETRY IN 5M");
-      loading.textContent = "▌ STATIC TOO LOUD · " + e.message;
+      const cacheAge = Date.now() - cached.savedAt;
+      if (cacheAge > CACHE_MAX_AGE_MS) {
+        setStatus("error", "STALE CACHE");
+        showDataNotice("error", `CACHED DATA IS ${formatAge(cacheAge)} · UPDATING NOW`);
+      } else {
+        setStatus("fetching", `CACHE ${formatAge(cacheAge)}`);
+      }
     }
   }
 
   syncSwitcher();
   focusTickerEl.textContent = "$" + FOCUS;
-  channelHeaderEl.textContent = "▌ " + FOCUS + " CHANNEL";
-  loadAndRender();
-  setInterval(loadAndRender, POLL_MS);
+  channelHeaderEl.textContent = `${FOCUS} CHANNEL`;
+  window.el5RefreshFromNative = () => loadAndRender(true);
+  window.addEventListener("online", () => loadAndRender(true));
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!lastComputedData) return;
+      renderView(lastComputedData);
+      if (viewMode !== "overview") {
+        renderChannel(computeChannel(lastComputedData.focusSeries, lastComputedData.priceIsLive ? lastComputedData.focusLast : null));
+      }
+    }, 100);
+  });
+  document.addEventListener("visibilitychange", () => {
+    clearTimeout(refreshTimer);
+    if (document.hidden) refreshController?.abort();
+    else loadAndRender(true);
+  });
+  loadAndRender(true);
 })();
 </script>
 </body>

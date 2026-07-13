@@ -1,69 +1,64 @@
-# el5 — bootstrap
+# el5
 
-Sister-product workspace to HackTrader. Same radial-correlation visualization, applied to crypto tokens with crypto-specific dimensions (24/7 trading, volume weighting, time-of-day patterns, weekend effects, stablecoin proximity).
+el5 is a read-only crypto market-structure instrument for the web and iPhone. It measures rolling seven-day Pearson correlation across a 13-asset Coinbase universe and turns that structure into an overview, focused radial radar, regime brief, diversification score, alerts, and a live price channel.
 
-This bootstrap folder currently contains only the **viability spike** — a Python script that fetches 12 months of hourly BTC + 12-alt klines from Binance, computes rolling 30-day Pearson correlations, and reports whether the radar peer-spread is wide enough for the visualization to carry information on this asset class. If the spike's verdict comes back STRONG or MARGINAL, the next step is forking HackTrader's UI shell and pointing it at the crypto data path. If it comes back PANCAKE, the radial encoding doesn't add information for crypto and we'd need a different visual primitive.
+The production website is [el5.io](https://el5.io). The access code is `STATIC`.
 
-## Run
+## Product
+
+- **ALL overview** shows BTC, ETH, SOL, and XRP together with live quotes, 24-hour change, regime, and alignment.
+- **Focused radar** positions 12 peers by absolute correlation to the selected focus asset.
+- **Structure brief** states the important market deltas plainly: regime, tightening or loosening, average correlation, alignment, coverage, and strongest/weakest coupling.
+- **Diversify view** reverses the radar and shows the neutral score `1 - |correlation|`; it does not recommend holdings or allocations.
+- **In-app alerts** detect two-standard-deviation moves in completed-hour correlation history, with a 30-minute per-pair cooldown.
+- **Price channel** uses EMA(20) and ATR(14), displays upper/current/lower zones, and places the live quote against boundaries calculated from completed candles.
+- **Snapshot export** produces a retina PNG with an el5.io watermark and UTC timestamp.
+
+Replay was intentionally removed. el5 reports the current structure rather than asking the user to reconstruct it from historical animation.
+
+## Architecture
+
+The web product has no build system, framework, server application, or runtime dependency. The interface, calculations, Coinbase client, cache, and alerts live in `dashboard.html`.
+
+| File | Purpose |
+|---|---|
+| `index.html` | Client-side access gate and public links. |
+| `dashboard.html` | Complete market-structure dashboard. |
+| `privacy.html` | Public privacy policy. |
+| `support.html` | Public support page. |
+| `deploy.sh` | Static rsync deployment to el5.io. |
+| `data/` and `gen_*.py` | Legacy research inputs; not required by the current dashboard. |
+
+## Data execution
+
+- Coinbase Exchange public endpoints; no API key or backend proxy.
+- 168 completed hourly candles plus a 24-hour structure comparison window.
+- Current ticker quotes are fetched separately from completed candles.
+- At most three requests run concurrently; each request has a 15-second timeout.
+- Bars are validated, sorted, deduplicated, and gap-checked before returns are calculated.
+- Failed symbols are excluded and labeled instead of being mixed with stale values.
+- A versioned local cache supports clearly labeled stale/offline fallback for up to six hours.
+- Refresh runs every five minutes, pauses while hidden, and resumes when the page returns online or visible.
+
+## Local preview
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python3 spike.py
+python3 -m http.server 8000
 ```
 
-First run: ~2 minutes (mostly Binance API rate-limit sleeps). Subsequent runs with `--skip-fetch` are seconds.
+Open `http://127.0.0.1:8000` and enter `STATIC`.
 
-Outputs land in:
+## Deployment
 
-- `data/{SYMBOL}_1h.csv` — raw klines per token (BTC + 12 alts)
-- `data/correlations_30d.csv` — wide table of rolling Pearson correlations vs BTC
-- `results/summary.md` — verdict + per-alt stats
-- `results/spread_histogram.png` — distribution of all pairwise correlations
-- `results/sample_radial.png` — three radial layouts at recent timestamps
+```bash
+bash deploy.sh
+```
 
-## Verdict thresholds
+The script uses `~/.ssh/pengo` and deploys the public static files to `el5user@el5.io:/home/el5user/el5.io/`.
 
-The script reports a basket spread = max correlation − min correlation across all 12 alts at each timestamp. Median basket spread determines the verdict:
+## Security and privacy
 
-| Spread | Verdict | Action |
-|---|---|---|
-| >= 0.30 | Strong spread | Build the crypto dashboard — radar reads as a distribution |
-| >= 0.15 | Marginal | Build with a curated lower-correlation basket, or with volume weighting to break ties |
-| <  0.15 | Pancake | Radial encoding adds no info — pick a different visual primitive |
-
-## Peer basket (initial)
-
-BTC focus + 12 alts: ETH, SOL, BNB, XRP, ADA, AVAX, DOGE, DOT, LINK, ATOM, NEAR, LTC.
-
-Picked for: top-12-by-cap excluding stablecoins and BTC; mix of L1s (SOL, AVAX, NEAR, ATOM, ADA, DOT), L2-adjacent (LINK), payment tokens (DOGE, LTC, XRP), and exchange tokens (BNB). If the spike's verdict is marginal, try swapping in lower-correlation candidates like XLM, BCH, ETC, or longer-tail tokens with genuinely different beta profiles to BTC.
-
-## Storage architecture (for after the spike)
-
-Two paths if we build out:
-
-1. **Share HackTrader's Redis** under a `ht:crypto:*` prefix. Pros: zero infra duplication, easier ops. Cons: tighter coupling between products; a Redis outage takes both down.
-2. **Run a separate Redis instance** (or use Redis DB 1 on the same host while keeping HackTrader on DB 0). Pros: clean isolation, can scale and tune independently. Cons: two Redis to monitor.
-
-For the spike, results are written to local CSVs only. The architectural decision happens after the verdict comes back — if the viz is viable, we'll spec it then.
-
-## Why a separate workspace at all?
-
-Code reuse with HackTrader is significant (radar, focus-peer architecture, channel chart, Stripe wiring, auth) but the product positioning, marketing surface, data pipeline (Binance vs Massive), and ops model (24/7 vs market-hours) all differ. Putting el5 in its own workspace keeps the boundaries clean and avoids dashboard-mode-toggle complexity in HackTrader. If we later decide a unified product is better, merging is cheaper than splitting.
-
-## Next steps after the spike
-
-If the verdict is STRONG or MARGINAL:
-
-1. Fork the HackTrader UI shell into `el5/dashboard.php` (or rewrite the relevant pieces as static HTML if we go SSR-light)
-2. Stand up a crypto data refresher daemon analogous to `market_data_refresher.py` but pointed at Binance, with 24/7 cadence (no market-state classification needed)
-3. Build the crypto-specific widgets discussed in chat:
-   - Volume-weighted correlation radius
-   - Time-of-day session band on the channel chart
-   - Weekend/weekday split metric
-   - Stablecoin-proximity ring (how many alts are anchored to USDT/USDC right now)
-4. Decide on storage architecture (see above)
-5. File a continuation-in-part on the HackTrader provisional patent that explicitly covers crypto asset-class and these crypto-specific visual dimensions
-
-If PANCAKE: don't build the crypto radar. Use the spike's data to design a different visual that does carry information about peer structure in a high-correlation regime — probably something like "rank-by-deviation-from-BTC" or "relative-strength fan" instead of polar coordinates.
+- No market-data API secrets are used by the product.
+- The gate is a lightweight client-side access screen, not a security boundary.
+- Preferences, cached data, focus selection, and alert history stay in browser local storage.
+- Support requests go to `support@el5.io`.

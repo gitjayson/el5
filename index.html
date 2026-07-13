@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>el5.io</title>
 <meta name="description" content="el5 — crypto market structure visualization. invite-only beta.">
 <meta name="theme-color" content="#07070d">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #07070d;
@@ -24,7 +21,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
-  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: var(--text);
   background: var(--bg);
   overflow: hidden;
@@ -71,7 +68,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 24px;
+  padding: calc(18px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) 18px calc(24px + env(safe-area-inset-left));
   z-index: 10;
 }
 .wordmark {
@@ -93,7 +90,7 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
 }
 .gate {
   display: flex;
@@ -158,7 +155,7 @@ footer {
   bottom: 0; left: 0; right: 0;
   display: flex;
   justify-content: space-between;
-  padding: 14px 24px;
+  padding: 14px calc(24px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
   font-size: 10px;
   letter-spacing: 0.22em;
   color: var(--dim);
@@ -226,8 +223,8 @@ body.granted .static { opacity: 0.30; }
 @media (max-width: 480px) {
   .gate-input { width: 200px; }
   .gate, #revealed { padding: 20px 24px; min-width: 280px; }
-  header { padding: 14px 16px; }
-  footer { padding: 12px 16px; font-size: 9px; }
+  header { padding: calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 14px calc(16px + env(safe-area-inset-left)); }
+  footer { padding: 12px calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); font-size: 9px; }
 }
 </style>
 </head>
@@ -246,19 +243,19 @@ body.granted .static { opacity: 0.30; }
     <div class="gate-label">▌ ACCESS</div>
     <input type="text" id="code" class="gate-input" placeholder="ENTER CODE" autocomplete="off" autocapitalize="characters" spellcheck="false">
     <div class="gate-hint">INVITE-ONLY BETA</div>
-    <a class="gate-link" href="mailto:jghawley@gmail.com?subject=el5%20access%20request">REQUEST ACCESS →</a>
+    <a class="gate-link" href="mailto:support@el5.io?subject=el5%20access%20request">REQUEST ACCESS →</a>
   </form>
 
   <div id="revealed">
     <div class="granted-headline">▌ ACCESS GRANTED</div>
-    <a class="enter-btn" href="/dashboard.html">ENTER DASHBOARD ↗</a>
+    <a class="enter-btn" href="dashboard.html">ENTER DASHBOARD ↗</a>
     <div class="granted-sub">LIVE CRYPTO STRUCTURE · BTC FOCUS · 12 ALTS</div>
   </div>
 </main>
 
 <footer>
   <span><span class="live-dot"></span>EL5.IO · BETA</span>
-  <span>© 2026 PENGUINS LLC · <a href="https://hacktrader.com">HACKTRADER ↗</a></span>
+  <span><a href="privacy.html">PRIVACY</a> · <a href="support.html">SUPPORT</a> · <a href="https://hacktrader.com">HACKTRADER ↗</a></span>
 </footer>
 
 <script>
