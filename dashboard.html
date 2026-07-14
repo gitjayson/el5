@@ -950,6 +950,7 @@ footer a:hover { color: var(--muted); }
   .ticker-label { font-size: 24px; }
   .diversify-ticker { font-size: 18px; }
   .corr-label { display: none; }
+  .diversify-corr { display: none; }
   .corr-value { font-size: 28px; }
   .div-ring-label { font-size: 20px; }
   .score-badge { font-size: 16px; }
@@ -2376,8 +2377,8 @@ footer a:hover { color: var(--muted); }
     label.setAttribute("x", lx.toFixed(1));
     label.setAttribute("y", ly.toFixed(1));
     label.setAttribute("text-anchor", "middle");
-    label.setAttribute("class", "corr-value");
     label.setAttribute("fill", "#7a8aff");
+    label.setAttribute("class", "corr-value diversify-corr");
     label.setAttribute("font-size", compactViewport() ? "30" : "9");
     label.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace");
     label.textContent = Number.isFinite(corr) ? "r:" + corr.toFixed(2) : "N/A";
