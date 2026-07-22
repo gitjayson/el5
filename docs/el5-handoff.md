@@ -35,11 +35,10 @@ The product is a current-state market-structure instrument. Replay and portfolio
 ## Deployment
 
 ```bash
-cd /Users/jay/space/el5-current
 bash deploy.sh
 ```
 
-Deployment uses `~/.ssh/pengo` and rsyncs public files to `el5user@el5.io:/home/el5user/el5.io/`. Development scripts, repository metadata, docs, and inactive macro data are excluded.
+Set `EL5_REMOTE`, `EL5_PATH`, and `SSH_KEY` in the local environment before running the script. Connection details remain outside the repository. Development scripts, repository metadata, docs, and inactive macro data are excluded.
 
 ## Important notes
 

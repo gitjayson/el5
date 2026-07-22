@@ -54,7 +54,7 @@ Open `http://127.0.0.1:8000` and enter `STATIC`.
 bash deploy.sh
 ```
 
-The script uses `~/.ssh/pengo` and deploys the public static files to `el5user@el5.io:/home/el5user/el5.io/`.
+Set `EL5_REMOTE`, `EL5_PATH`, and `SSH_KEY` in the local environment before running the script. Deployment credentials and destinations are intentionally not stored in the repository.
 
 ## Security and privacy
 

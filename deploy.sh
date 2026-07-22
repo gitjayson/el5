@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# el5/deploy.sh — rsync the web-servable files to el5.io.
-#
-# Pattern mirrors hacktrader/deploy.sh:
-#   - SSH via ~/.ssh/pengo (override with SSH_KEY env var)
-#   - rsync excludes everything that's research/dev cruft
-#   - only ships files that should be served from the webroot
+# Rsync the web-servable files to a locally configured destination.
+# Connection details are intentionally not stored in the repository.
 
-REMOTE="${EL5_REMOTE:-el5user@el5.io}"
-REMOTE_PATH="${EL5_PATH:-/home/el5user/el5.io}"
-SSH_KEY="${SSH_KEY:-$HOME/.ssh/pengo}"
+REMOTE="${EL5_REMOTE:?Set EL5_REMOTE to the SSH destination}"
+REMOTE_PATH="${EL5_PATH:?Set EL5_PATH to the remote web root}"
+SSH_KEY="${SSH_KEY:?Set SSH_KEY to the local private key path}"
 LOCAL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "==> el5 deploy"
@@ -21,7 +17,6 @@ echo
 
 if [ ! -f "${SSH_KEY}" ]; then
   echo "ERROR: SSH key not found at ${SSH_KEY}" >&2
-  echo "  Set SSH_KEY env var if your key is elsewhere." >&2
   exit 1
 fi
 
