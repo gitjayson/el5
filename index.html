@@ -152,6 +152,28 @@ main {
   padding-bottom: 1px;
 }
 .gate-link:hover { color: var(--cyan); border-bottom-color: var(--cyan); }
+.app-store-btn {
+  display: inline-flex;
+  width: 240px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 16px;
+  border: 1px solid rgba(0, 240, 255, 0.62);
+  color: var(--cyan);
+  background: rgba(0, 240, 255, 0.035);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  transition: background 0.16s, color 0.16s, transform 0.08s;
+}
+.app-store-btn:hover {
+  background: var(--cyan);
+  color: #07070d;
+}
+.app-store-btn:active { transform: scale(0.97); }
 footer {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -224,6 +246,7 @@ body.granted .static { opacity: 0.30; }
 }
 @media (max-width: 480px) {
   .gate-input { width: 200px; }
+  .app-store-btn { width: 200px; }
   .gate, #revealed { padding: 20px 24px; min-width: 280px; }
   header { padding: calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 14px calc(16px + env(safe-area-inset-left)); }
   footer { padding: 12px calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); font-size: 9px; }
@@ -246,11 +269,13 @@ body.granted .static { opacity: 0.30; }
     <input type="text" id="code" class="gate-input" placeholder="ENTER CODE" autocomplete="off" autocapitalize="characters" spellcheck="false">
     <div class="gate-hint">INVITE-ONLY BETA</div>
     <a class="gate-link" href="mailto:support@el5.io?subject=el5%20access%20request">REQUEST ACCESS →</a>
+    <a class="app-store-btn" href="https://apps.apple.com/us/app/el5-io/id6773509396" target="_blank" rel="noopener noreferrer" aria-label="Get el5.io on the App Store">IPHONE APP ↗</a>
   </form>
 
   <div id="revealed">
     <div class="granted-headline">▌ ACCESS GRANTED</div>
     <a class="enter-btn" href="dashboard.html">ENTER DASHBOARD ↗</a>
+    <a class="app-store-btn" href="https://apps.apple.com/us/app/el5-io/id6773509396" target="_blank" rel="noopener noreferrer" aria-label="Get el5.io on the App Store">IPHONE APP ↗</a>
     <div class="granted-sub">LIVE CRYPTO STRUCTURE · BTC FOCUS · 12 ALTS</div>
   </div>
 </main>
